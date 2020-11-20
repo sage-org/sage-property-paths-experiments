@@ -1,0 +1,26 @@
+{
+  "name": "experiments",
+  "version": "1.0.0",
+  "description": "An experimental study to test a preemptable transitive closure operator under the web preemption model",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JulienDavat/property-paths-experiments.git"
+  },
+  "author": "Julien AIMONIER-DAVAT",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JulienDavat/property-paths-experiments/issues"
+  },
+  "homepage": "https://github.com/JulienDavat/property-paths-experiments#readme",
+  "dependencies": {
+    "commander": "^6.2.0",
+    "fetch-sparql-endpoint": "^1.8.0",
+    "fs-extra": "^9.0.1",
+    "path": "^0.12.7",
+    "sage-client": "../sage-client"
+  }
+}
