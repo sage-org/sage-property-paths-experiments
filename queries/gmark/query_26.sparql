@@ -1,0 +1,1 @@
+PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x3  WHERE {   ?x0 ((:pname)|(:pemail)|(:phomepage)) ?x1 .  ?x0 ((:pfriendOf/^:pfriendOf)|(:phomepage/^:phomepage))+ ?x2 . ?x2 (:plike) ?x3  }

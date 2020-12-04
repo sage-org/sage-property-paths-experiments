@@ -1,0 +1,1 @@
+PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE { ?x0 (((^:phasReview/:pauthor/^:previewer)|(:previewer/^:pconductor/:phasReview)))+ ?x1 . ?x0 ((:previewer/^:pconductor/:phasReview)) ?x2 . }
