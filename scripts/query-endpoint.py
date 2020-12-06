@@ -1,7 +1,7 @@
 import click, sys, json, time, os, math
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-def execute(server_url, default_graph_iri, query, timeout):
+def execute(server_url, default_graph_iri, query, timeout, print_solution):
     sparql_wrapper = SPARQLWrapper(server_url)
     # sparql_wrapper.addDefaultGraph(default_graph_iri)
     sparql_wrapper.setQuery(query)
@@ -19,6 +19,8 @@ def execute(server_url, default_graph_iri, query, timeout):
             solution = {}
             for key in result:
                 solution[key] = result[key]["value"]
+            if print_solution:
+                print(solution)
             bindings.append(solution)
         execution_time = end_time - start_time
         data_transfer = sys.getsizeof(json.dumps(bindings))
@@ -82,26 +84,26 @@ def compute_averages(statistics):
         statistics[query]['nb_results'] = compute_average(statistics[query]['nb_results'])
 
 def write_statistics(statistics, endpoint, output):
-    data = 'query,approach,execution_time,http_calls,data_transfer,nb_results,state\n'
+    data = 'query,approach,execution_time,http_calls,data_transfer,nb_results,nb_duplicates,state\n'
     for query in statistics.keys():
         execution_time = statistics[query]['execution_time']
         http_calls = statistics[query]['http_calls']
         data_transfer = statistics[query]['data_transfer']
         nb_results = statistics[query]['nb_results']
         state = statistics[query]['state']
-        data += f'{query},{endpoint},{execution_time},{http_calls},{data_transfer},{nb_results},{state}\n'
+        data += f'{query},{endpoint},{execution_time},{http_calls},{data_transfer},{nb_results},0.0,{state}\n'
     with open(output, 'w') as output_file:
         output_file.write(data)
 
 
-def execute_queries(endpoint, server_url, default_graph_iri, queries, timeout, nb_iterations, warm_up, output):
+def execute_queries(endpoint, server_url, default_graph_iri, queries, timeout, nb_iterations, warm_up, output, print_solution):
     statistics = init_statistics(queries)
     for iteration in range(0, nb_iterations):
         for query in queries:
             print(f'iteration: {iteration} - query: {query["name"]}')
             query_name = query['name']
             query_value = query['value']
-            (execution_time, http_calls, data_transfer, nb_results, state) = execute(server_url, default_graph_iri, query_value, timeout)
+            (execution_time, http_calls, data_transfer, nb_results, state) = execute(server_url, default_graph_iri, query_value, timeout, print_solution)
             if (not warm_up or iteration > 0) and (statistics[query_name]['state'] == 'complete'):
                 statistics[query_name]['execution_time'].append(execution_time)
                 statistics[query_name]['http_calls'].append(http_calls)
@@ -128,7 +130,8 @@ def cli():
 @click.option('--timeout', '-t', type=int)
 @click.option('--times', '-n', type=int, default=1)
 @click.option('--warmup', '-w', default=False)
-def virtuoso(server_url, default_graph_iri, output, query, file, directory, timeout, times, warmup):
+@click.option('--display', '-p', default=False)
+def virtuoso(server_url, default_graph_iri, output, query, file, directory, timeout, times, warmup, display):
     print(f'Evaluation using virtuoso: \n\t- url: {server_url} \n\t- graph: {default_graph_iri} \n\t- timeout: {timeout} \n\t- iterations: {times} \n\t- warmup: {warmup}')
     queries = []
     if query is not None:
@@ -137,7 +140,7 @@ def virtuoso(server_url, default_graph_iri, output, query, file, directory, time
         queries += extract_queries_from_files(file)
     if directory is not None:
         queries += extract_queries_from_directory(directory)
-    execute_queries('Virtuoso', server_url, default_graph_iri, queries, timeout, times, warmup, output)    
+    execute_queries('Virtuoso', server_url, default_graph_iri, queries, timeout, times, warmup, output, display)    
 
 @cli.command()
 @click.argument("server_url", type=str)
@@ -149,7 +152,8 @@ def virtuoso(server_url, default_graph_iri, output, query, file, directory, time
 @click.option('--timeout', '-t', type=int)
 @click.option('--times', '-n', type=int, default=1)
 @click.option('--warmup', '-w', default=False)
-def fuseki(server_url, default_graph_iri, output, query, file, directory, timeout, times, warmup):
+@click.option('--display', '-p', default=False)
+def fuseki(server_url, default_graph_iri, output, query, file, directory, timeout, times, warmup, display):
     print(f'Evaluation using fuseki: \n\t- url: {server_url} \n\t- graph: {default_graph_iri} \n\t- timeout: {timeout} \n\t- iterations: {times} \n\t- warmup: {warmup}')
     queries = []
     if query is not None:
@@ -158,7 +162,7 @@ def fuseki(server_url, default_graph_iri, output, query, file, directory, timeou
         queries += extract_queries_from_files(file)
     if directory is not None:
         queries += extract_queries_from_directory(directory)
-    execute_queries('Jena Fuseki', server_url, default_graph_iri, queries, timeout, times, warmup, output)
+    execute_queries('Jena Fuseki', server_url, default_graph_iri, queries, timeout, times, warmup, output, display)
 
 if __name__ == "__main__":
     cli()
