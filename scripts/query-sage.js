@@ -184,7 +184,7 @@ function execute(query) {
                 execution_time = (end_time - start_time) / 1000.0
                 http_calls = spy.nbHTTPCalls
                 data_transfer = spy.transferSize
-                nb_results = results.length
+                nb_results = results.length - nb_duplicates
                 state = spy.queryState
                 resolve([execution_time, http_calls, data_transfer, nb_results, nb_duplicates, 'error'])
             }, () => {
@@ -193,7 +193,7 @@ function execute(query) {
                 execution_time = execution_time > timeout ? timeout : execution_time
                 http_calls = spy.nbHTTPCalls
                 data_transfer = spy.transferSize
-                nb_results = results.length
+                nb_results = results.length - nb_duplicates
                 let state = spy.queryState
                 resolve([execution_time, http_calls, data_transfer, nb_results, nb_duplicates, state])
             }
