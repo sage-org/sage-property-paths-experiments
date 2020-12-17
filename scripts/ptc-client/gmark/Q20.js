@@ -5,7 +5,6 @@ let queries = [
     `PREFIX : <http://example.org/gmark/> 
     SELECT ?x2 ?x3 ?x0 ?x1 
     WHERE { 
-        BIND(STR("1") AS ?bgp)
         ?x0 ((:phomepage/^:phomepage)|(:phomepage/^:phomepage))+ ?x1 . 
         ?x0 (:partist) ?v0 . ?v0 (:plike) ?x2 . 
         ?x1 (:partist) ?v1 . ?v1 (:pmakesPurchase) ?v2 . ?v2 (:ppurchaseFor) ?x3 .
@@ -13,7 +12,6 @@ let queries = [
     `PREFIX : <http://example.org/gmark/> 
     SELECT ?x2 ?x3 ?x0 ?x1 
     WHERE { 
-        BIND(STR("2") AS ?bgp)
         ?x0 ((:phomepage/^:phomepage)|(:phomepage/^:phomepage))+ ?x1 . 
         ?x0 (:partist) ?v0 . ?v0 (:plike) ?x2 .  
         ?x1 (:partist) ?v1 . ?v1 (^:previewer) ?v2 . ?v2 (^:phasReview) ?x3 .
@@ -22,6 +20,7 @@ let queries = [
 
 async function run(client, graph) {
     let result_set = new ResultSet()
+    result_set.bgp = 1
     await eval(queries[0], client, graph, result_set, (state) => {
         let projection = '?x0'
         let triples = [
@@ -34,6 +33,7 @@ async function run(client, graph) {
         ]
         return build_resume_query(projection, triples, state)
     })
+    result_set.bgp = 2
     await eval(queries[1], client, graph, result_set, (state) => {
         let projection = '?x0'
         let triples = [

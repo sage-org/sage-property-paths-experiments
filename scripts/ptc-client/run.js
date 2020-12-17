@@ -2,17 +2,21 @@ const program = require('commander')
 const HttpClient = require('./http-client').HttpClient
 const Spy = require('./spy').Spy
 
-const Q2 = require('./gmark/Q2').run
-const Q3 = require('./gmark/Q3').run
+const Q1 = require('./gmark/Q1').run
+const Q2 = require('./gmark/Q2').run 
+const Q3 = require('./gmark/Q3').run 
 const Q4 = require('./gmark/Q4').run
-const Q5 = require('./gmark/Q5').run
-const Q6 = require('./gmark/Q6').run
+const Q5 = require('./gmark/Q5').run 
+const Q6 = require('./gmark/Q6').run 
+const Q7 = require('./gmark/Q7').run
 const Q8 = require('./gmark/Q8').run
 const Q9 = require('./gmark/Q9').run
 const Q10 = require('./gmark/Q10').run
 const Q11 = require('./gmark/Q11').run
+const Q12 = require('./gmark/Q12').run
 const Q13 = require('./gmark/Q13').run
 const Q14 = require('./gmark/Q14').run
+const Q15 = require('./gmark/Q15').run
 const Q16 = require('./gmark/Q16').run
 const Q17 = require('./gmark/Q17').run
 const Q18 = require('./gmark/Q18').run
@@ -24,6 +28,7 @@ const Q23 = require('./gmark/Q23').run
 const Q24 = require('./gmark/Q24').run
 const Q25 = require('./gmark/Q25').run
 const Q26 = require('./gmark/Q26').run
+const Q27 = require('./gmark/Q27').run
 const Q28 = require('./gmark/Q28').run
 const Q29 = require('./gmark/Q29').run
 const Q30 = require('./gmark/Q30').run
@@ -64,4 +69,4 @@ async function run_query(Q) {
     console.log(`time: ${(end_time - start_time) / 1000} sec`)
 }
 
-run_query(Q19)
+run_query(Q27)

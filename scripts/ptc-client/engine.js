@@ -1,6 +1,7 @@
 const crypto = require('crypto-js')
 
 async function execute(query, client, graph) {
+    console.log(query)
     let bindings = []
     let next_states = []
     let has_next = true
@@ -57,8 +58,6 @@ function update_information(state, visited) {
 
 function match_path_pattern(triple, state) {
     if (triple.path === state.path.predicate) {
-        console.log(triple.path)
-        console.log(state.path.predicate)
         return triple.subject === state.path.subject || triple.object === state.path.object
     }
     return false
@@ -81,10 +80,12 @@ function build_resume_query(projection, triples, state) {
         bound_variables.push(variable)
         where += `BIND(IRI("${value}") AS ${variable})\n`
     }
+    let one_match = false
     for (let triple of triples) {
         if (is_bound_pattern(triple, bound_variables)) {
             continue
         } else if (match_path_pattern(triple, state)) {
+            one_match = true
             if (state.forward) {
                 where += `<${state.node}> ${triple.predicate} ${triple.object} .\n`
             } else {
@@ -93,6 +94,9 @@ function build_resume_query(projection, triples, state) {
         } else {
             where += `${triple.subject} ${triple.predicate} ${triple.object} .\n`
         }
+    }
+    if (!one_match) {
+        throw new Error(`Path pattern not found for the state: ${state}`)
     }
     return `PREFIX : <http://example.org/gmark/>
     SELECT ${projection}
@@ -116,6 +120,8 @@ async function eval(query, client, graph, result_set, resume_function) {
                 mark_as_visited(next_state, visited)
                 if (must_expand(next_state, visited)) {
                     let next_query = resume_function(next_state)
+                    console.log(next_state)
+                    console.log(next_query)
                     stack.push({query: next_query, state: next_state})
                 }
             } else {

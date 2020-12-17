@@ -5,7 +5,6 @@ let queries = [
     `PREFIX : <http://example.org/gmark/> 
     SELECT ?x3 ?x1 ?x2 ?x0 
     WHERE { 
-        BIND(STR("1") AS ?bgp)
         ?x0 (^:phomepage) ?v0 . ?v0 (^:plike) ?v1 . ?v1 (:phomepage) ?x1 . 
         ?x1 (^:phomepage) ?v2 . ?v2 (:phomepage) ?x2 . 
         ?x2 ((^:phomepage/:phomepage))+ ?x3 . 
@@ -14,7 +13,6 @@ let queries = [
     `PREFIX : <http://example.org/gmark/> 
     SELECT ?x3 ?x0 
     WHERE { 
-        BIND(STR("2") AS ?bgp)
         ?x0 (^:phomepage) ?v0 . ?v0 (^:plike) ?v1 . ?v1 (:phomepage) ?x1 . 
         ?x1 (^:phomepage) ?v2 . ?v2 (:pfriendOf) ?v3 . ?v3 (:psubscribes) ?x2 . 
         ?x2 (((^:phomepage/:phomepage)))+ ?x3 . 
@@ -23,7 +21,6 @@ let queries = [
     `PREFIX : <http://example.org/gmark/> 
     SELECT ?x3 ?x0 
     WHERE { 
-        BIND(STR("3") AS ?bgp)
         ?x0 (^:phomepage) ?v0 . ?v0 (^:plike) ?v1 . ?v1 (:psubscribes) ?x1 . 
         ?x1 (^:phomepage) ?v2 . ?v2 (:phomepage) ?x2 . 
         ?x2 (((^:phomepage/:phomepage)))+ ?x3 . 
@@ -32,7 +29,6 @@ let queries = [
     `PREFIX : <http://example.org/gmark/> 
     SELECT ?x3 ?x0 
     WHERE { 
-        BIND(STR("4") AS ?bgp)
         ?x0 (^:phomepage) ?v0 . ?v0 (^:plike) ?v1 . ?v1 (:psubscribes) ?x1 . 
         ?x1 (^:phomepage) ?v2 . ?v2 (:pfriendOf) ?v3 . ?v3 (:psubscribes) ?x2 . 
         ?x2 (((^:phomepage/:phomepage)))+ ?x3 . 
@@ -42,6 +38,7 @@ let queries = [
 
 async function run(client, graph) {
     let result_set = new ResultSet()
+    result_set.bgp = 1
     await eval(queries[0], client, graph, result_set, (state) => {
         let projection = '?x0'
         let triples = [
@@ -57,6 +54,7 @@ async function run(client, graph) {
         ]
         return build_resume_query(projection, triples, state)
     })
+    result_set.bgp = 2
     await eval(queries[1], client, graph, result_set, (state) => {
         let projection = '?x0'
         let triples = [
@@ -73,6 +71,7 @@ async function run(client, graph) {
         ]
         return build_resume_query(projection, triples, state)
     })
+    result_set.bgp = 3
     await eval(queries[2], client, graph, result_set, (state) => {
         let projection = '?x0'
         let triples = [
@@ -88,6 +87,7 @@ async function run(client, graph) {
         ]
         return build_resume_query(projection, triples, state)
     })
+    result_set.bgp = 4
     await eval(queries[3], client, graph, result_set, (state) => {
         let projection = '?x0'
         let triples = [
