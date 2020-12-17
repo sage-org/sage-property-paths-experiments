@@ -17,7 +17,11 @@
   },
   "homepage": "https://github.com/JulienDavat/property-paths-experiments#readme",
   "dependencies": {
+    "async": "^3.2.0",
+    "axios": "^0.21.0",
+    "axios-retry": "^3.1.9",
     "commander": "^6.2.0",
+    "crypto-js": "^4.0.0",
     "fetch-sparql-endpoint": "^1.8.0",
     "fs-extra": "^9.0.1",
     "path": "^0.12.7",
