@@ -29,6 +29,7 @@ async function run(client, graph) {
     })
     solutions = result_set.solutions()
     console.log(`Number of solutions: ${solutions.length}`)
+    return result_set
 }
 
 module.exports = { 'run': run }

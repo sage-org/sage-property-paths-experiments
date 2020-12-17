@@ -2,9 +2,8 @@ const program = require('commander')
 const fs = require('fs-extra')
 const path = require('path')
 
-const SageClient = require('sage-client/dist/client').default
-const DirectClient = require('sage-client/dist/direct-client').default
-const Spy = require('sage-client/dist/spy').default
+const PTCClient = require('./ptc-client/client').PTCClient
+const Spy = require('./ptc-client/spy').Spy
 
 // ====================================================================================================
 // ===== Command line interface =======================================================================
@@ -15,7 +14,6 @@ program.description('Evaluates a set of SPARQL queries using the web preemption 
     .option('-q, --query <query>', 'Evaluates the given SPARQL query')
     .option('-f, --files <files...>', 'Evaluates the SPARQL queries stored in the given files')
     .option('-d, --directory <directory>', 'Evaluates the SPARQL queries stored in the given directory')
-    .option('-m, --method <method>', 'Evaluates the SPARQL queries using the specified method: [mono, multi, alpha, direct]', 'direct')
     .option('-n, --repeat <iterations>', 'Evaluates the SPARQL queries n times and retuns the average of the n iterations', 1)
     .option('-p, --print', 'prints each new result during query execution')
     .option('--warmup', 'Evaluates the SPARQL queries one time without registering any statistics', false)
@@ -95,17 +93,6 @@ if (queries.length === 0) {
     console.error('Error: no SPARQL query found...')
 }
 
-// Get the evaluation strategy from the command line arguments
-
-let method = program.method
-if (!['mono', 'multi', 'alpha', 'direct'].includes(method)) {
-    console.error('Error: invalid evaluation strategy. Available strategies are: [mono, multi, direct]')
-    console.error('- mono : property paths queries are evaluated using a client-side automaton-based approach with a mono-predicate automaton')
-    console.error('- multi : property paths queries are evaluated using a client-side automaton-based approach with a multi-predicate automaton')
-    console.error('- alpha : property paths queries are evaluated using a client-side alpha operator to support transitive closures')
-    console.error('- direct : property paths queries are evaluated on the server')
-}
-
 // Get the experimental study parameters
 
 let warm_up_run = program.warmup
@@ -116,77 +103,24 @@ let timeout = program.timeout
 // ===== Queries evaluation  ==========================================================================
 // ====================================================================================================
 
-function get_client(spy) {
-    if (method === 'direct') {
-        return new DirectClient(server_url, default_graph_iri, spy)
-    } else if (method === 'mono') {
-        let options = {'property-paths-strategy': 'mono-predicate-automaton'}
-        return new SageClient(server_url, default_graph_iri, spy, options=options)
-    } else if (method === 'multi') {
-        let options = {'property-paths-strategy': 'multi-predicate-automaton'}
-        return new SageClient(server_url, default_graph_iri, spy, options=options)
-    } else if (method === 'alpha') {
-        let options = {'property-paths-strategy': 'alpha-operator'}
-        return new SageClient(server_url, default_graph_iri, spy, options=options)
-    }
-}
-
-function extract_imprint(solution) {
-    for (let mapping of solution._content) {
-        if (mapping[0] === '?imprint') {
-            return mapping[1]
-        }
-    }
-    throw new Error("Each solution mapping must have an imprint !")
-}
-
-function execute(query) {
-    return new Promise((resolve, _) => {
-        let spy = new Spy()
-        let results = []
-        let memory = {}
-        let start_time = Date.now()
-        let execution_time = 0
-        let http_calls = 0
-        let data_transfer = 0
-        let nb_results = 0
-        let nb_duplicates = 0
-        get_client(spy).execute(query, timeout).subscribe(
-            (solution) => {
-                results.push(solution)
-                if (method === 'direct') {
-                    let imprint = extract_imprint(solution)
-                    if (imprint in memory) {
-                        nb_duplicates++
-                    } else {
-                        memory[imprint] = true
-                    }
-                }
-                if (program.print) {
-                    console.log(solution)
-                    console.log(`number of results: ${results.length - nb_duplicates}`)
-                }
-            }, (error) => {
-                console.log(error)
-                let end_time = Date.now()
-                execution_time = (end_time - start_time) / 1000.0
-                http_calls = spy.nbHTTPCalls
-                data_transfer = spy.transferSize
-                nb_results = results.length - nb_duplicates
-                state = spy.queryState
-                resolve([execution_time, http_calls, data_transfer, nb_results, nb_duplicates, 'error'])
-            }, () => {
-                let end_time = Date.now()
-                execution_time = (end_time - start_time) / 1000.0
-                execution_time = execution_time > timeout ? timeout : execution_time
-                http_calls = spy.nbHTTPCalls
-                data_transfer = spy.transferSize
-                nb_results = results.length - nb_duplicates
-                let state = spy.queryState
-                resolve([execution_time, http_calls, data_transfer, nb_results, nb_duplicates, state])
-            }
-        )
-    })
+async function execute(query) {
+    let spy = new Spy()
+    let start_time = Date.now()
+    let result_set = await new PTCClient(server_url, default_graph_iri, spy).execute_one_call(query, timeout)
+    let end_time = Date.now()
+    let execution_time = (end_time - start_time) / 1000.0
+    execution_time = execution_time > timeout ? timeout : execution_time
+    let http_calls = spy.nbHTTPCalls
+    let data_transfer = spy.transferSize
+    let nb_results = result_set.solutions().length
+    let nb_duplicates = result_set.duplicates()
+    let state = 'complete'
+    if (execution_time === timeout) {
+        state = 'timeout'
+    } else if (!result_set.complete) {
+        state = 'incomplete'
+    } 
+    return [execution_time, http_calls, data_transfer, nb_results, nb_duplicates, state]
 }
 
 function compute_average(values) {
@@ -207,25 +141,12 @@ function statistics_average() {
     }
 }
 
-function get_method() {
-    if (method === 'direct') {
-        return 'SaGe'
-    } else if (method === 'mono') {
-        return 'SaGeClient-Mono'
-    } else if (method === 'multi') {
-        return 'SaGeClient-Multi'
-    } else if (method === 'alpha') {
-        return 'SaGeClient-Alpha'
-    }
-}
-
 function write_statistics() {
     let data = 'query,approach,execution_time,http_calls,data_transfer,nb_results,nb_duplicates,state\n'
     for (let query of Object.keys(statistics)) {
-        let approach = get_method()
         let row = [
             query,
-            approach,
+            'SaGeClient-PTC',
             statistics[query]['execution_time'],
             statistics[query]['http_calls'],
             statistics[query]['data_transfer'],

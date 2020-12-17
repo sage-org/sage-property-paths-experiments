@@ -131,4 +131,4 @@ async function eval(query, client, graph, result_set, resume_function) {
     }
 }
 
-module.exports = { 'eval': eval, 'build_resume_query': build_resume_query }
+module.exports = { 'eval': eval, 'execute': execute, 'build_resume_query': build_resume_query }

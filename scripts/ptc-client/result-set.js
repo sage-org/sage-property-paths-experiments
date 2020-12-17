@@ -5,6 +5,7 @@ class ResultSet {
         this._memory = {}
         this._duplicates = 0
         this._bgp = 1
+        this._complete = true
     }
 
     append(solution) {
@@ -40,6 +41,14 @@ class ResultSet {
 
     get bgp() {
         return this._bgp
+    }
+
+    set complete(value) {
+        this._complete = value
+    }
+
+    get complete() {
+        return this._complete
     }
 }
 

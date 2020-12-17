@@ -15,6 +15,13 @@ let queries = [
         ?x0 (:pemail) ?x1 .  
         ?x0 ((:pfriendOf/^:pfriendOf)|(:phomepage/^:phomepage))+ ?x2 . 
         ?x2 (:plike) ?x3
+    }`,
+    `PREFIX : <http://example.org/gmark/> 
+    SELECT ?x3 ?x0 
+    WHERE { 
+        ?x0 (:phomepage) ?x1 .  
+        ?x0 ((:pfriendOf/^:pfriendOf)|(:phomepage/^:phomepage))+ ?x2 . 
+        ?x2 (:plike) ?x3
     }`
 ]
 
@@ -40,8 +47,19 @@ async function run(client, graph) {
         ]
         return build_resume_query(projection, triples, state)
     })
+    result_set.bgp = 3
+    await eval(queries[2], client, graph, result_set, (state) => {
+        let projection = '?x3 ?x0'
+        let triples = [
+            {subject: '?x0', predicate: '(:phomepage)', object: '?x1'},
+            {subject: '?x0', predicate: '((:pfriendOf/^:pfriendOf)|(:phomepage/^:phomepage))+', object: '?x2', path: 'Path(Path(Path(http://example.org/gmark/pfriendOf / Path(~http://example.org/gmark/pfriendOf)) | Path(http://example.org/gmark/phomepage / Path(~http://example.org/gmark/phomepage)))+)'},
+            {subject: '?x2', predicate: '(:plike)', object: '?x3'}
+        ]
+        return build_resume_query(projection, triples, state)
+    })
     let solutions = result_set.solutions() 
     console.log(`Number of solutions: ${solutions.length}`)
+    return result_set
 }
 
 module.exports = { 'run': run }

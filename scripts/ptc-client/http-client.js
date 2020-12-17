@@ -27,15 +27,15 @@ class HttpClient {
                 task.callback(error)
             }
         }, 4)
-        this._closed = false
+        this._isClosed = false
     }
 
     open() {
-        this._closed = true
+        this._isClosed = false
     }
 
     close() {
-        this._closed = false
+        this._isClosed = true
     }
 
     execute(queryBody) {   
@@ -67,10 +67,10 @@ class HttpClient {
     query (query, defaultGraph, next) {
         return new Promise((resolve, reject) => {
             if (this._isClosed) {
-            if (this._spy) {
-                this._spy.reportQueryState('timeout')
-            }
-            resolve({bindings: [], hasNext: false, next: null})
+                if (this._spy) {
+                    this._spy.reportQueryState('timeout')
+                }
+                resolve({bindings: [], hasNext: false, next: null})
             } else {
                 let task = {
                     body: {
