@@ -1,134 +1,98 @@
-QUERIES = [
-    'query_1', 
-    'query_2', 
-    'query_3', 
-    'query_4', 
-    'query_5', 
-    'query_6', 
-    'query_7', 
-    'query_8', 
-    'query_9', 
-    'query_10', 
-    'query_11', 
-    'query_12', 
-    'query_13', 
-    'query_14', 
-    'query_15', 
-    'query_16', 
-    'query_17', 
-    'query_18', 
-    'query_19', 
-    'query_20', 
-    'query_21', 
-    'query_22', 
-    'query_23', 
-    'query_24', 
-    'query_25', 
-    'query_26',
-    'query_27', 
-    'query_28', 
-    'query_29', 
-    'query_30'
-]
+# GMark
 
-rule run_all:
-    input:
-        expand('queries/gmark/{query}.sparql', query=QUERIES)
-
-rule run_sage_direct:
-    input:
-        ancient('queries/gmark/{query}.sparql')
+rule gmark_run_sage_ptc:
     output:
-        'output/gmark/sage_direct/{query}.csv'
+        'output/gmark/sage_ptc.csv'
     shell:
-        'node ./scripts/query-sage.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -f {input} --timeout 1800 --method direct'
+        'node ./scripts/sage-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -d ./queries/gmark --timeout 1800'
 
-rule merge_sage_direct_data:
-    input:
-        expand('output/gmark/sage_direct/{query}.csv', query=QUERIES)
+rule gmark_run_sage_client_ptc:
     output:
-        'output/gmark/sage_direct.csv'
+        'output/gmark/sage_client_ptc.csv'
     shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
+        'node ./scripts/sage-client-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} --workload GMark --timeout 1800'
 
-rule run_sage_multi:
-    input:
-        ancient('queries/gmark/{query}.sparql')
+rule gmark_run_sage_client_multi:
     output:
-        'output/gmark/sage_multi/{query}.csv'
+        'output/gmark/sage_client_multi.csv'
     shell:
-        'node scripts/query-sage.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -f {input} --timeout 1800 --method multi'
+        'node ./scripts/query-sage.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -d ./queries/gmark --method multi --timeout 1800'
 
-rule merge_sage_multi_data:
-    input:
-        expand('output/gmark/sage_multi/{query}.csv', query=QUERIES)
-    output:
-        'output/gmark/sage_multi.csv'
-    shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
-
-rule run_sage_alpha:
-    input:
-        ancient('queries/gmark/{query}.sparql')
-    output:
-        'output/gmark/sage_alpha/{query}.csv'
-    shell:
-        'node scripts/query-sage.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -f {input} --timeout 1800 --method alpha'
-
-rule merge_sage_alpha_data:
-    input:
-        expand('output/gmark/sage_alpha/{query}.csv', query=QUERIES)
-    output:
-        'output/gmark/sage_alpha.csv'
-    shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
-
-rule run_virtuoso:
-    input:
-        ancient('queries/gmark/{query}.sparql')
-    output:
-        'output/gmark/virtuoso/{query}.csv'
-    shell:
-        'python ./scripts/query-endpoint.py virtuoso http://localhost:8890/sparql http://example.org/datasets/shop10M {output} -f {input} --timeout 1800'
-
-rule merge_virtuoso_data:
-    input:
-        expand('output/gmark/virtuoso/{query}.csv', query=QUERIES)
+rule gmark_run_virtuoso:
     output:
         'output/gmark/virtuoso.csv'
     shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
+        'python ./scripts/query-endpoint.py virtuoso http://localhost:8890/sparql http://example.org/datasets/shop10M {output} -d ./queries/gmark --timeout 1800'
 
-rule run_jena_fuseki:
-    input:
-        ancient('queries/gmark/{query}.sparql')
-    output:
-        'output/gmark/fuseki/{query}.csv'
-    shell:
-        'python ./scripts/query-endpoint.py fuseki http://localhost:8890/sparql http://example.org/datasets/shop10M {output} -f {input} --timeout 1800'
-
-rule merge_jena_fuseki_data:
-    input:
-        expand('output/gmark/fuseki/{query}.csv', query=QUERIES)
+rule gmark_run_fuseki:
     output:
         'output/gmark/fuseki.csv'
     shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
+        'python ./scripts/query-endpoint.py fuseki http://localhost:8890/sparql http://example.org/datasets/shop10M {output} -d ./queries/gmark --timeout 1800'
 
-rule merge_approaches_data:
+rule gmark_quantum_impact:
     input:
-        expand('output/gmark/{approach}.csv', approach=['fuseki', 'virtuoso', 'sage_alpha', 'sage_multi', 'sage_direct'])
+        ancient('output/gmark/sage_ptc_60sec.csv'),
+        ancient('output/gmark/sage_ptc_10sec.csv'),
+        ancient('output/gmark/sage_ptc_1sec.csv')
     output:
-        'output/gmark/data.csv'
+        'output/gmark/quantum_impact.csv'
     shell:
         'bash ./scripts/merge_csv.sh {input} > {output}'
 
-rule plot_metrics:
+rule gmark_tpc_client_k_impact:
     input:
-        'output/gmark/data.csv'
+        ancient('output/gmark/sage_client_ptc_2.csv'),
+        ancient('output/gmark/sage_client_ptc_5.csv'),
+        ancient('output/gmark/sage_client_ptc_10.csv')
     output:
-        'output/gmark/data_transfer.png',
-        'output/gmark/execution_time.png',
-        'output/gmark/http_calls.png'
+        'output/gmark/quantum_impact.csv'
     shell:
-        'python ./scripts/plots.py --input {input} --output output/gmark'
+        'bash ./scripts/merge_csv.sh {input} > {output}'
+
+rule gmark_approaches_comparison:
+    input:
+        ancient('output/gmark/sage_ptc_60sec.csv'),
+        ancient('output/gmark/sage_client_ptc_5.csv'),
+        ancient('output/gmark/fuseki.csv'),
+        ancient('output/gmark/virtuoso.csv')
+    output:
+        'output/gmark/approaches_comparison.csv'
+    shell:
+        'bash ./scripts/merge_csv.sh {input} > {output}'
+
+# Wikidata
+
+rule wikidata_run_sage_ptc:
+    output:
+        'output/wikidata/sage_ptc.csv'
+    shell:
+        'node ./scripts/sage-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/wikidata {output} -d ./queries/wikidata --timeout 1800'
+
+rule wikidata_run_sage_client_ptc:
+    output:
+        'output/wikidata/sage_client_ptc.csv'
+    shell:
+        'node ./scripts/sage-client-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/wikidata {output} --workload Wikidata --timeout 1800'
+
+rule wikidata_run_sage_client_multi:
+    output:
+        'output/wikidata/sage_client_multi.csv'
+    shell:
+        'node ./scripts/query-sage.js http://localhost:8080/sparql http://example.org/datasets/hdt/wikidata {output} -d ./queries/wikidata --method multi --timeout 1800'
+
+rule wikidata_run_fuseki:
+    output:
+        'output/wikidata/fuseki.csv'
+    shell:
+        'python ./scripts/query-endpoint.py fuseki http://localhost:8890/sparql http://example.org/datasets/wikidata {output} -d ./queries/wikidata --timeout 1800'
+
+rule wikidata_approaches_comparison:
+    input:
+        ancient('output/wikidata/sage_ptc_60sec.csv'),
+        ancient('output/wikidata/sage_client_ptc_5.csv'),
+        ancient('output/wikidata/fuseki.csv')
+    output:
+        'output/wikidata/approaches_comparison.csv'
+    shell:
+        'bash ./scripts/merge_csv.sh {input} > {output}'

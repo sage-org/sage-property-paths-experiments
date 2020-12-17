@@ -42,6 +42,8 @@ if (program.query) {
     queries.push({'name': 'command-line query', 'value': program.query})
     statistics['command-line query'] = {
         'data_transfer': [],
+        'bindings_data_transfer': [],
+        'stars_data_transfer': [],
         'execution_time': [],
         'http_calls': [],
         'nb_results': [],
@@ -57,6 +59,8 @@ if (program.files) {
             queries.push({'name': query_name, 'value': query})
             statistics[query_name] = {
                 'data_transfer': [],
+                'bindings_data_transfer': [],
+                'stars_data_transfer': [],
                 'execution_time': [],
                 'http_calls': [],
                 'nb_results': [],
@@ -77,6 +81,8 @@ if (program.directory) {
                 queries.push({'name': query_name, 'value': query})
                 statistics[query_name] = {
                     'data_transfer': [],
+                    'bindings_data_transfer': [],
+                    'stars_data_transfer': [],
                     'execution_time': [],
                     'http_calls': [],
                     'nb_results': [],
@@ -112,6 +118,8 @@ async function execute(query) {
     execution_time = execution_time > timeout ? timeout : execution_time
     let http_calls = spy.nbHTTPCalls
     let data_transfer = spy.transferSize
+    let bindings_data_transfer = spy.bindingsDataTransfer
+    let stars_data_transfer = spy.starsInformationDataTransfer
     let nb_results = result_set.solutions().length
     let nb_duplicates = result_set.duplicates()
     let state = 'complete'
@@ -120,7 +128,7 @@ async function execute(query) {
     } else if (!result_set.complete) {
         state = 'incomplete'
     } 
-    return [execution_time, http_calls, data_transfer, nb_results, nb_duplicates, state]
+    return [execution_time, http_calls, data_transfer, bindings_data_transfer, stars_data_transfer, nb_results, nb_duplicates, state]
 }
 
 function compute_average(values) {
@@ -134,6 +142,8 @@ function compute_average(values) {
 function statistics_average() {
     for (let query of Object.keys(statistics)) {
         statistics[query]['data_transfer'] = compute_average(statistics[query]['data_transfer'])
+        statistics[query]['bindings_data_transfer'] = compute_average(statistics[query]['bindings_data_transfer'])
+        statistics[query]['stars_data_transfer'] = compute_average(statistics[query]['stars_data_transfer'])
         statistics[query]['execution_time'] = compute_average(statistics[query]['execution_time'])
         statistics[query]['http_calls'] = compute_average(statistics[query]['http_calls'])
         statistics[query]['nb_results'] = compute_average(statistics[query]['nb_results'])
@@ -142,7 +152,7 @@ function statistics_average() {
 }
 
 function write_statistics() {
-    let data = 'query,approach,execution_time,http_calls,data_transfer,nb_results,nb_duplicates,state\n'
+    let data = 'query,approach,execution_time,http_calls,data_transfer,bindings_data_transfer,stars_data_transfer,nb_results,nb_duplicates,state\n'
     for (let query of Object.keys(statistics)) {
         let row = [
             query,
@@ -150,6 +160,8 @@ function write_statistics() {
             statistics[query]['execution_time'],
             statistics[query]['http_calls'],
             statistics[query]['data_transfer'],
+            statistics[query]['bindings_data_transfer'],
+            statistics[query]['stars_data_transfer'],
             statistics[query]['nb_results'],
             statistics[query]['nb_duplicates'],
             statistics[query]['state']
@@ -164,9 +176,11 @@ async function run() {
     for (let iteration = 0; iteration < number_of_iteration; iteration++) {
         for (let query of queries) {
             console.log(`iteration: ${iteration} - query: ${query.name}`)
-            let [execution_time, http_calls, data_transfer, nb_results, nb_duplicates, state] = await execute(query.value)
+            let [execution_time, http_calls, data_transfer, bindings_data_transfer, stars_data_transfer, nb_results, nb_duplicates, state] = await execute(query.value)
             if ((!warm_up_run || iteration > 0) && statistics[query.name]['state'] === 'complete') {
                 statistics[query.name]['data_transfer'].push(data_transfer)
+                statistics[query.name]['bindings_data_transfer'].push(bindings_data_transfer)
+                statistics[query.name]['stars_data_transfer'].push(stars_data_transfer)
                 statistics[query.name]['execution_time'].push(execution_time)
                 statistics[query.name]['http_calls'].push(http_calls)
                 statistics[query.name]['nb_results'].push(nb_results)

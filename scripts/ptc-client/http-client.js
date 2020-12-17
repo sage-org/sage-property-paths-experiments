@@ -51,6 +51,8 @@ class HttpClient {
                     if (this._spy) {
                         this._spy.reportHTTPRequest()
                         this._spy.reportHTTPTransferSize(Buffer.byteLength(JSON.stringify(body), 'utf8'))
+                        this._spy.reportBindingsDataTransfer(Buffer.byteLength(JSON.stringify(body.bindings), 'utf-8'))
+                        this._spy.reportStarsInformationDataTransfer(Buffer.byteLength(JSON.stringify(body.controls), 'utf-8'))
                     }
                     resolve(body)
                 }).catch((error) => {
