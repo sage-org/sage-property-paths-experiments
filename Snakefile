@@ -4,7 +4,7 @@ rule gmark_run_sage_ptc:
     output:
         'output/gmark/sage_ptc.csv'
     shell:
-        'node ./scripts/sage-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -d ./queries/gmark --timeout 1800'
+        'node ./scripts/sage-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -d ./queries/gmark --timeout 1800 --warmup'
 
 rule gmark_run_sage_client_ptc:
     output:
