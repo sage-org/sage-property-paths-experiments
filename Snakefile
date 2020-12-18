@@ -4,13 +4,13 @@ rule gmark_run_sage_ptc:
     output:
         'output/gmark/sage_ptc.csv'
     shell:
-        'node ./scripts/sage-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -d ./queries/gmark --timeout 1800'
+        'node ./scripts/sage-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -w ./scripts/ptc-client/gmark_queries.json --timeout 1800'
 
 rule gmark_run_sage_client_ptc:
     output:
         'output/gmark/sage_client_ptc.csv'
     shell:
-        'node ./scripts/sage-client-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} --workload GMark --timeout 1800'
+        'node ./scripts/sage-client-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -w ./scripts/ptc-client/gmark_queries.json --timeout 1800'
 
 rule gmark_run_sage_client_multi:
     output:
