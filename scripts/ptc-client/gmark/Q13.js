@@ -49,8 +49,8 @@ async function run(client, graph) {
             {subject: '?x1', predicate: '(^:phomepage)', object: '?v2'},
             {subject: '?v2', predicate: '(:phomepage)', object: '?x2'},
             
-            {subject: '?x2', predicate: '((^:phomepage/:phomepage))+', object: '?x3', path: 'Path(Path(~http://example.org/gmark/phomepage / Path(http://example.org/gmark/phomepage))+)'},
-            {subject: '?x3', predicate: '((^:ptrailer/:ptrailer))+', object: '?x4', path: 'Path(Path(~http://example.org/gmark/ptrailer / Path(http://example.org/gmark/ptrailer))+)'}
+            {subject: '?x2', predicate: '((^:phomepage/:phomepage))+', object: '?x3', path: 'Path(Path(Path(~http://example.org/gmark/phomepage) / http://example.org/gmark/phomepage)+)'},
+            {subject: '?x3', predicate: '((^:ptrailer/:ptrailer))+', object: '?x4', path: 'Path(Path(Path(~http://example.org/gmark/ptrailer) / http://example.org/gmark/ptrailer)+)'}
         ]
         return build_resume_query(projection, triples, state)
     })
@@ -66,8 +66,8 @@ async function run(client, graph) {
             {subject: '?v2', predicate: '(:pfriendOf)', object: '?v3'},
             {subject: '?v3', predicate: '(:psubscribes)', object: '?x2'},
 
-            {subject: '?x2', predicate: '((^:phomepage/:phomepage))+', object: '?x3', path: 'Path(Path(~http://example.org/gmark/phomepage / Path(http://example.org/gmark/phomepage))+)'},
-            {subject: '?x3', predicate: '((^:ptrailer/:ptrailer))+', object: '?x4', path: 'Path(Path(~http://example.org/gmark/ptrailer / Path(http://example.org/gmark/ptrailer))+)'}
+            {subject: '?x2', predicate: '((^:phomepage/:phomepage))+', object: '?x3', path: 'Path(Path(Path(~http://example.org/gmark/phomepage) / http://example.org/gmark/phomepage)+)'},
+            {subject: '?x3', predicate: '((^:ptrailer/:ptrailer))+', object: '?x4', path: 'Path(Path(Path(~http://example.org/gmark/ptrailer) / http://example.org/gmark/ptrailer)+)'}
         ]
         return build_resume_query(projection, triples, state)
     })
@@ -82,8 +82,8 @@ async function run(client, graph) {
             {subject: '?x1', predicate: '(^:phomepage)', object: '?v2'},
             {subject: '?v2', predicate: '(:phomepage)', object: '?x2'},
 
-            {subject: '?x2', predicate: '((^:phomepage/:phomepage))+', object: '?x3', path: 'Path(Path(~http://example.org/gmark/phomepage / Path(http://example.org/gmark/phomepage))+)'},
-            {subject: '?x3', predicate: '((^:ptrailer/:ptrailer))+', object: '?x4', path: 'Path(Path(~http://example.org/gmark/ptrailer / Path(http://example.org/gmark/ptrailer))+)'}
+            {subject: '?x2', predicate: '((^:phomepage/:phomepage))+', object: '?x3', path: 'Path(Path(Path(~http://example.org/gmark/phomepage) / http://example.org/gmark/phomepage)+)'},
+            {subject: '?x3', predicate: '((^:ptrailer/:ptrailer))+', object: '?x4', path: 'Path(Path(Path(~http://example.org/gmark/ptrailer) / http://example.org/gmark/ptrailer)+)'}
         ]
         return build_resume_query(projection, triples, state)
     })
@@ -99,8 +99,8 @@ async function run(client, graph) {
             {subject: '?v2', predicate: '(:pfriendOf)', object: '?v3'},
             {subject: '?v3', predicate: '(:psubscribes)', object: '?x2'},
 
-            {subject: '?x2', predicate: '((^:phomepage/:phomepage))+', object: '?x3', path: 'Path(Path(~http://example.org/gmark/phomepage / Path(http://example.org/gmark/phomepage))+)'},
-            {subject: '?x3', predicate: '((^:ptrailer/:ptrailer))+', object: '?x4', path: 'Path(Path(~http://example.org/gmark/ptrailer / Path(http://example.org/gmark/ptrailer))+)'}
+            {subject: '?x2', predicate: '((^:phomepage/:phomepage))+', object: '?x3', path: 'Path(Path(Path(~http://example.org/gmark/phomepage) / http://example.org/gmark/phomepage)+)'},
+            {subject: '?x3', predicate: '((^:ptrailer/:ptrailer))+', object: '?x4', path: 'Path(Path(Path(~http://example.org/gmark/ptrailer) / http://example.org/gmark/ptrailer)+)'}
         ]
         return build_resume_query(projection, triples, state)
     })
