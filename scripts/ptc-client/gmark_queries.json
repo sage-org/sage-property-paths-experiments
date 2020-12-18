@@ -266,8 +266,8 @@
                         {"subject": "?x1", "predicate": "(^:phomepage)", "object": "?v2"},
                         {"subject": "?v2", "predicate": "(:phomepage)", "object": "?x2"},
                         
-                        {"subject": "?x2", "predicate": "((^:phomepage/:phomepage))+", "object": "?x3", "path": "Path(Path(~http://example.org/gmark/phomepage / Path(http://example.org/gmark/phomepage))+)"},
-                        {"subject": "?x3", "predicate": "((^:ptrailer/:ptrailer))+", "object": "?x4", "path": "Path(Path(~http://example.org/gmark/ptrailer / Path(http://example.org/gmark/ptrailer))+)"}
+                        {"subject": "?x2", "predicate": "((^:phomepage/:phomepage))+", "object": "?x3", "path": "Path(Path(Path(~http://example.org/gmark/phomepage) / http://example.org/gmark/phomepage)+)"},
+                        {"subject": "?x3", "predicate": "((^:ptrailer/:ptrailer))+", "object": "?x4", "path": "Path(Path(Path(~http://example.org/gmark/ptrailer) / http://example.org/gmark/ptrailer)+)"}
                     ]
                 },
                 {
