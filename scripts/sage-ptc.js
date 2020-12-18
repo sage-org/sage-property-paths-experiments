@@ -11,9 +11,7 @@ const Spy = require('./ptc-client/spy').Spy
 
 program.description('Evaluates a set of SPARQL queries using the web preemption model')
     .usage('<server-url> <default-graph-iri> <output> [options]')
-    .option('-q, --query <query>', 'Evaluates the given SPARQL query')
-    .option('-f, --files <files...>', 'Evaluates the SPARQL queries stored in the given files')
-    .option('-d, --directory <directory>', 'Evaluates the SPARQL queries stored in the given directory')
+    .option('-w, --workload <workload>', 'Evaluates the given workload of queries')
     .option('-n, --repeat <iterations>', 'Evaluates the SPARQL queries n times and retuns the average of the n iterations', 1)
     .option('-p, --print', 'prints each new result during query execution')
     .option('--warmup', 'Evaluates the SPARQL queries one time without registering any statistics', false)
@@ -38,63 +36,22 @@ let output_file = program.args[2]
 let queries = []
 let statistics = {}
 
-if (program.query) {
-    queries.push({'name': 'command-line query', 'value': program.query})
-    statistics['command-line query'] = {
-        'data_transfer': [],
-        'bindings_data_transfer': [],
-        'stars_data_transfer': [],
-        'execution_time': [],
-        'http_calls': [],
-        'nb_results': [],
-        'nb_duplicates': [],
-        'state': 'complete'
-    }
-}
-if (program.files) {
-    for (let file of program.files) {
-        if (fs.existsSync(file)) {
-            let query = fs.readFileSync(file, 'utf-8')
-            let query_name = path.basename(file, '.sparql')
-            queries.push({'name': query_name, 'value': query})
-            statistics[query_name] = {
-                'data_transfer': [],
-                'bindings_data_transfer': [],
-                'stars_data_transfer': [],
-                'execution_time': [],
-                'http_calls': [],
-                'nb_results': [],
-                'nb_duplicates': [],
-                'state': 'complete'
-            }
-        } else {
-            console.error(`Error: the file ${file} does not exist...`)
+if (program.workload) {
+    queries = fs.readJSONSync(program.workload)
+    for (let query of queries) {
+        statistics[query.name] = {
+            'data_transfer': [],
+            'bindings_data_transfer': [],
+            'stars_data_transfer': [],
+            'execution_time': [],
+            'http_calls': [],
+            'nb_results': [],
+            'nb_duplicates': [],
+            'state': 'complete'
         }
     }
 }
-if (program.directory) {
-    if (fs.existsSync(program.directory)) {
-        for (let file of fs.readdirSync(program.directory)) {
-            if (path.extname(file) === '.sparql') {
-                let query = fs.readFileSync(`${program.directory}/${file}`, 'utf-8')
-                let query_name = path.basename(file, '.sparql')
-                queries.push({'name': query_name, 'value': query})
-                statistics[query_name] = {
-                    'data_transfer': [],
-                    'bindings_data_transfer': [],
-                    'stars_data_transfer': [],
-                    'execution_time': [],
-                    'http_calls': [],
-                    'nb_results': [],
-                    'nb_duplicates': [],
-                    'state': 'complete'
-                }
-            }
-        }
-    } else {
-        console.error(`Error: the directory ${program.directory} does not exist...`)
-    }
-}
+
 if (queries.length === 0) {
     console.error('Error: no SPARQL query found...')
 }
@@ -112,7 +69,7 @@ let timeout = program.timeout
 async function execute(query) {
     let spy = new Spy()
     let start_time = Date.now()
-    let result_set = await new PTCClient(server_url, default_graph_iri, spy).execute_one_call(query, timeout)
+    let result_set = await new PTCClient(server_url, default_graph_iri, spy).execute_ptc(query, timeout)
     let end_time = Date.now()
     let execution_time = (end_time - start_time) / 1000.0
     execution_time = execution_time > timeout ? timeout : execution_time
@@ -186,7 +143,7 @@ async function run() {
                 statistics[query.name]['nb_results'].push(nb_results)
                 statistics[query.name]['nb_duplicates'].push(nb_duplicates)
                 statistics[query.name]['state'] = state
-                console.log(`'results: \n\t- exec_time: ${execution_time} sec \n\t- calls: ${http_calls} \n\t- transfer: ${data_transfer} bytes \n\t- solutions: ${nb_results} \n\t- duplicates: ${nb_duplicates} \n\t- state: ${state}'`)
+                console.log(`'results: \n\t- exec_time: ${execution_time} sec \n\t- calls: ${http_calls} \n\t- transfer: ${data_transfer} bytes \n\t- transfer.bindings: ${bindings_data_transfer} bytes \n\t- transfer.control: ${stars_data_transfer} bytes \n\t- solutions: ${nb_results} \n\t- duplicates: ${nb_duplicates} \n\t- state: ${state}'`)
             } else {
                 console.log('results not recorded !')
             }

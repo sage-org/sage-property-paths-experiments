@@ -1,6 +1,6 @@
 const HttpClient = require('./http-client').HttpClient
 const ResultSet = require('./result-set').ResultSet
-const { execute } = require('./engine')
+const { execute, eval, build_resume_query } = require('./engine')
 
 class PTCClient {
 
@@ -11,44 +11,61 @@ class PTCClient {
         this._http = new HttpClient(server_url, spy)
     }
 
-    async execute(query, timeout) {
+    async run_ptc_client(query) {
+        let result_set = new ResultSet()
+        for (let [number, subquery] of query.subqueries.entries()) {
+            result_set.bgp = number
+            await eval(subquery.value, this._http, this._default_graph_iri, result_set, (state) => {
+                return build_resume_query(subquery.projection, subquery.triples, state)
+            })
+        }
+        let solutions = result_set.solutions()
+        console.log(`Number of solutions: ${solutions.length}`)
+        return result_set
+    }
+
+    async execute_ptc_client(query, timeout) {
         let http = this._http
         http.open()
         if (timeout) {
             let subscription = setTimeout(function() {
                 http.close()
             }, timeout * 1000)
-            let result_set = await query.run(this._http, this._default_graph_iri)
+            let result_set = await this.run_ptc_client(query)
             clearTimeout(subscription)
             return result_set
         }
-        return await query.run(this._http, this._default_graph_iri)
+        return await this.run_ptc_client(query)
     }
 
-    async execute_one_call(query, timeout) {
+    async run_ptc(query) {
         let result_set = new ResultSet()
-        let http = this._http
-        http.open()
-        let result = null
-        if (timeout) {
-            let subscription = setTimeout(function() {
-                result_set.complete = false
-                http.close()
-            }, timeout * 1000)
-            result = await execute(query, this._http, this._default_graph_iri)
-            clearTimeout(subscription)
-        } else {
-            result = await execute(query, this._http, this._default_graph_iri)
-        }
-        let [bindings, stars_information] = result 
-        result_set.append_all(bindings)
-        for (let row of stars_information) {
-            if (row.depth === row.max_depth) {
-                result_set.complete = false
-                break
+        for (let [number, subquery] of query.subqueries.entries()) {
+            result_set.bgp = number
+            let [bindings, stars_information] = await execute(subquery.value, this._http, this._default_graph_iri)
+            result_set.append_all(bindings)
+            for (let row of stars_information) {
+                if (row.depth === row.max_depth) {
+                    result_set.complete = false
+                    break
+                }
             }
         }
         return result_set
+    }
+
+    async execute_ptc(query, timeout) {
+        let http = this._http
+        http.open()
+        if (timeout) {
+            let subscription = setTimeout(function() {
+                http.close()
+            }, timeout * 1000)
+            let result_set = await this.run_ptc(query)
+            clearTimeout(subscription)
+            return result_set
+        }
+        return await this.run_ptc(query)
     }
 }
 
