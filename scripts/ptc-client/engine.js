@@ -73,6 +73,16 @@ function is_bound_pattern(triple, bound_variables) {
     }
 }
 
+function format_term(term) {
+    if (term.startsWith('?')) {
+        return term
+    } else if (term.startsWith('http')) {
+        return `<${term}>`
+    } else {
+        return term
+    }
+}
+
 function build_resume_query(projection, triples, state) {
     let where = ''
     let bound_variables = []
@@ -82,17 +92,17 @@ function build_resume_query(projection, triples, state) {
     }
     let one_match = false
     for (let triple of triples) {
-        if (is_bound_pattern(triple, bound_variables)) {
-            continue
-        } else if (match_path_pattern(triple, state)) {
+        if (match_path_pattern(triple, state)) {
             one_match = true
             if (state.forward) {
-                where += `<${state.node}> ${triple.predicate} ${triple.object} .\n`
+                where += `<${state.node}> ${triple.predicate} ${format_term(triple.object)} .\n`
             } else {
-                where += `${triple.subject} ${triple.predicate} <${state.node}> .\n`
+                where += `${format_term(triple.subject)} ${triple.predicate} <${state.node}> .\n`
             }
+        } else if (is_bound_pattern(triple, bound_variables)) {
+            continue
         } else {
-            where += `${triple.subject} ${triple.predicate} ${triple.object} .\n`
+            where += `${format_term(triple.subject)} ${triple.predicate} ${format_term(triple.object)} .\n`
         }
     }
     if (!one_match) {
