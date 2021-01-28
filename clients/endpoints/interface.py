@@ -18,14 +18,14 @@ def execute(server_url, default_graph_iri, query, timeout, print_solution):
         data_transfer = sys.getsizeof(json.dumps(result))
         nb_solutions = len(results["results"]["bindings"])
 
-        return (result, (execution_time, 1, data_transfer, nb_solutions, 'complete')) 
+        return (result, (execution_time, 1, data_transfer, 0, 0, nb_solutions, 0, 'complete')) 
     except Exception as error:
         end_time = time.time()
         execution_time = end_time - start_time
         if str(error) == 'timed out':
-            return ({}, (execution_time, 1, 0, 0, 'timeout'))
+            return ({}, (execution_time, 1, 0, 0, 0, 0, 0, 'timeout'))
         else:
-            return ({}, (execution_time, 1, 0, 0, 'error'))
+            return ({}, (execution_time, 1, 0, 0, 0, 0, 0, 'error'))
     
 
 @click.group()
@@ -81,10 +81,31 @@ def fuseki(server_url, default_graph_iri, measure, output, query, file, timeout,
         with open(output, 'w') as output_file:
             output_file.write(json.dumps(solutions))
     
-    if measure is not None:
-        (execution_time, nb_calls, data_transfer, nb_solutions, state) = statistics
+    (execution_time, nb_calls, data_transfer, data_transfer_approach_overhead, data_transfer_duplicates_overhead, nb_solutions, nb_duplicates, state) = statistics
+
+    if measure is not None:    
         with open(measure, 'w') as statistics_file:
-            statistics_file.write(f'{execution_time},{nb_calls},{data_transfer},{nb_solutions},{state}')
+            statistics_file.write((
+                f'{execution_time},'
+                f'{nb_calls},'
+                f'{data_transfer},'
+                f'{data_transfer_approach_overhead},'
+                f'{data_transfer_duplicates_overhead},'
+                f'{nb_solutions},'
+                f'{nb_duplicates},'
+                f'{state}'
+            ))
+
+    print((
+        'Execution complete !\n'
+        f'\t- time: {execution_time} sec\n'
+        f'\t- calls: {nb_calls} http requests\n'
+        f'\t- transfer: {data_transfer} bytes\n'
+        f'\t\t- approach overhead: {data_transfer_approach_overhead} bytes\n'
+        f'\t\t- duplicates overhead: {data_transfer_duplicates_overhead} bytes\n'
+        f'\t- solutions: {nb_solutions} solution mappings\n'
+        f'\t\t- duplicates: {nb_duplicates}\n'
+    ))
 
 if __name__ == "__main__":
     cli()

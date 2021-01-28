@@ -34,7 +34,7 @@ rule plot1_format_query_file:
         approach=lambda wcs: f'SaGe-PTC-{wcs.depth}'
     shell:
         'touch {output}; '
-        'echo "approach,dataset,max_depth,query,execution_time,nb_calls,data_transfer,nb_solutions,state,cost_solutions,cost_control_tuples,nb_duplicates" >> {output}; '
+        'echo "approach,dataset,max_depth,query,execution_time,nb_calls,data_transfer,data_transfer_approach_overhead,data_transfer_duplicates_overhead,nb_solutions,nb_duplicates,state" >> {output}; '
         'echo -n "{params.approach},{wildcards.dataset},{wildcards.depth},Q{wildcards.query}," >> {output}; '
         'cat {input} >> {output}; '
         'echo "" >> {output};'
@@ -59,7 +59,7 @@ rule plot1_compute_average:
     params:
         files=lambda wcs: [f'output/data/depth-impacts/{wcs.dataset}/{wcs.depth}/{run}/all.csv' for run in range(first_run(1), last_run(1) + 1)]
     shell:
-        'python scripts/average.py {output} "dataset,depth,query" {params.files}'
+        'python scripts/average.py {output} "approach,dataset,max_depth,query" {params.files}'
 
 
 rule plot1_merge_all_queries:

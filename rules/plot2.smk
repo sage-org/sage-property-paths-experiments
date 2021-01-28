@@ -34,7 +34,7 @@ rule plot2_format_query_file:
         approach=lambda wcs: f'SaGe-PTC-{wcs.quantum}'
     shell:
         'touch {output}; '
-        'echo "approach,dataset,quantum,query,execution_time,nb_calls,data_transfer,nb_solutions,state,cost_solutions,cost_control_tuples,nb_duplicates" >> {output}; '
+        'echo "approach,dataset,quantum,query,execution_time,nb_calls,data_transfer,data_transfer_approach_overhead,data_transfer_duplicates_overhead,nb_solutions,nb_duplicates,state" >> {output}; '
         'echo -n "{params.approach},{wildcards.dataset},{wildcards.quantum},Q{wildcards.query}," >> {output}; '
         'cat {input} >> {output}; '
         'echo "" >> {output};'
@@ -59,7 +59,7 @@ rule plot2_compute_average:
     params:
         files=lambda wcs: [f'output/data/quantum-impacts/{wcs.dataset}/{wcs.quantum}/{run}/all.csv' for run in range(first_run(2), last_run(2) + 1)]
     shell:
-        'python scripts/average.py {output} "dataset,quantum,query" {params.files}'
+        'python scripts/average.py {output} "approach,dataset,quantum,query" {params.files}'
 
 
 rule plot2_merge_all_queries:

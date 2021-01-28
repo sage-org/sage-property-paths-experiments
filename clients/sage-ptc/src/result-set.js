@@ -31,6 +31,10 @@ class ResultSet {
         return this._solutions
     }
 
+    get nb_solutions() {
+        return this._solutions.length
+    }
+
     get nb_duplicates() {
         return this._duplicates
     }
@@ -49,10 +53,6 @@ class ResultSet {
 
     get complete() {
         return this._complete
-    }
-
-    get size() {
-        return this._solutions.length
     }
 }
 

@@ -21,7 +21,7 @@ function generate_id(control_tuple) {
     return crypto.MD5(JSON.stringify(control_tuple.context)).toString()
 }
 
-function is_complete(control_tuples) {
+function has_frontiers_to_expand(control_tuples) {
     let nodes_state = {}
     for (let control_tuple of control_tuples) {
         let id = `${get_id(control_tuple)}-${control_tuple.node}`
@@ -185,4 +185,4 @@ async function eval(query, client, graph, result_set) {
     }
 }
 
-module.exports = { eval, execute, is_complete }
+module.exports = { eval, execute, has_frontiers_to_expand }

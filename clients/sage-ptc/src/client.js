@@ -1,6 +1,6 @@
 const HttpClient = require('./http-client').HttpClient
 const ResultSet = require('./result-set').ResultSet
-const { execute, eval, is_complete } = require('./engine')
+const { execute, eval, has_frontiers_to_expand } = require('./engine')
 
 class PTCClient {
 
@@ -26,7 +26,7 @@ class PTCClient {
             result_set.bgp = number
             let [solutions, control_tuples] = await execute(subquery, this._http, this._default_graph_iri)
             result_set.append_all(solutions)
-            result_set.complete = is_complete(control_tuples)
+            result_set.complete = !has_frontiers_to_expand(control_tuples)
         }
         return result_set
     }

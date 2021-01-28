@@ -100,9 +100,9 @@ rule plot3_format_query_file:
         'output/data/performance/{dataset}/{approach}/{run}/mergeable_query_{query}.csv'
     shell:
         'touch {output}; '
-        'echo "approach,query,execution_time,nb_calls,data_transfer,nb_solutions,state" >> {output}; '
-        'echo -n "{wildcards.approach},Q{wildcards.query}," >> {output}; '
-        'cut -d\',\' -f 1,2,3,4,5 {input} >> {output}; '
+        'echo "approach,dataset,query,execution_time,nb_calls,data_transfer,data_transfer_approach_overhead,data_transfer_duplicates_overhead,nb_solutions,nb_duplicates,state" >> {output}; '
+        'echo -n "{wildcards.approach},{wildcards.dataset},Q{wildcards.query}," >> {output}; '
+        'cat {input} >> {output}; '
         'echo "" >> {output};'
 
 
@@ -125,7 +125,7 @@ rule plot3_compute_average:
     params:
         files=lambda wcs: [f'output/data/performance/{wcs.dataset}/{wcs.approach}/{run}/all.csv' for run in range(first_run(3), last_run(3) + 1)]
     shell:
-        'python scripts/average.py {output} "approach,query" {params.files}'
+        'python scripts/average.py {output} "approach,dataset,query" {params.files}'
 
 
 rule plot3_merge_all_approaches:

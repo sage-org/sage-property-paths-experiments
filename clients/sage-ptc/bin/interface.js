@@ -12,8 +12,8 @@ program.description('Evaluates a set of SPARQL queries using the web preemption 
     .usage('<server-url> <default-graph-iri> [options]')
     .option('-q, --query <query>', 'Evaluates the given SPARQL query')
     .option('-f, --file <file>', 'Evaluates the SPARQL query in the given file')
-    .option('-m, --measure', 'Stores the query execution statistics in the given file')
-    .option('-o, --output', 'Stores the query result in the given file')
+    .option('-m, --measure <measure>', 'Stores the query execution statistics in the given file')
+    .option('-o, --output <output>', 'Stores the query result in the given file')
     .option('--not-expand-frontiers', 'When a frontier node is found, it is not expanded', false)
     .option('--timeout <timeout>', 'Sets a time limitation. No more http requests will be sent to the server after the time is out', 0)
     .parse(process.argv)
@@ -35,23 +35,31 @@ async function execute(server, graph, query) {
     let start_time = Date.now()
     let result_set = await new PTCClient(server, graph, spy).execute(query, program.timeout, !program.notExpandFrontiers)
     let elapsed_time = (Date.now() - start_time) / 1000.0
+    // Retrieves query execution statistics
+    let execution_time = (program.timeout > 0 && elapsed_time > timeout) ? program.timeout : elapsed_time
+    let nb_calls = spy.nb_http_calls
+    let data_transfer = spy.data_transfer
+    let data_transfer_approach_overhead = spy.control_tuples_size
+    let data_transfer_duplicates_overhead = Math.ceil( result_set.nb_duplicates / (result_set.nb_solutions + result_set.nb_duplicates) ) * data_transfer
+    let nb_results = result_set.nb_solutions
+    let nb_duplicates = result_set.nb_duplicates
+    let state = 'complete'
+    if (program.timeout > 0 && elapsed_time > program.timeout) {
+        state = 'timeout'
+    } else if (!result_set.complete) {
+        state = 'incomplete'
+    } 
     // Write the query execution statistics in the given file
     if (program.measure) {
-        let state = 'complete'
-        if (elapsed_time === timeout) {
-            state = 'timeout'
-        } else if (!result_set.complete) {
-            state = 'incomplete'
-        } 
         let row = [
-            (program.timeout > 0 && elapsed_time > timeout) ? program.timeout : elapsed_time,
-            spy.nb_http_calls,
-            spy.data_transfer,
-            result_set.size,
-            state,
-            spy.solutions_size,
-            spy.control_tuples_size,
-            result_set.nb_duplicates,   
+            execution_time,
+            nb_calls,
+            data_transfer,
+            data_transfer_approach_overhead,
+            data_transfer_duplicates_overhead,
+            nb_results,
+            nb_duplicates,
+            state
         ]
         data += row.join(',') + '\n'
         fs.writeFileSync(program.measure, data, {encoding: 'utf-8'})
@@ -63,10 +71,13 @@ async function execute(server, graph, query) {
     }
     // Prints query execution statistics
     console.log(`Execution complete !
-    - time: ${elapsed_time} sec
-    - calls: ${spy.nb_http_calls} http requests
-    - transfer: ${spy.data_transfer} bytes
-    - solutions: ${result_set.size} solution mappings`)
+    - time: ${execution_time} sec
+    - calls: ${nb_calls} http requests
+    - transfer: ${data_transfer} bytes
+        - approach overhead: ${data_transfer_approach_overhead} bytes
+        - duplicates overhead: ${data_transfer_duplicates_overhead} bytes
+    - solutions: ${nb_results} solution mappings
+        - duplicates: ${nb_duplicates}`)
 }
 
 if (program.file) {
