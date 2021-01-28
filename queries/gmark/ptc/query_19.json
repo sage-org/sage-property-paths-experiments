@@ -1,0 +1,6 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT  ?x0 ?x1 WHERE { ?x0 (((:psubscribes/^:phomepage/:peditor)|(^:pdirector/:ptrailer/^:phomepage)))+ ?x1 . ?x0 (((:pfriendOf)|(^:peditor/:phomepage/^:psubscribes)))+ ?x2 . ?x0 (((:pfriendOf)))+ ?x3 . ?x0 (((^:pfriendOf)))+ ?x4 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x1 WHERE { ?x0 ((:psubscribes/^:phomepage/:peditor)|(^:pdirector/:ptrailer/^:phomepage))+ ?x1 . ?x0 ((:pfriendOf)|(^:peditor/:phomepage/^:psubscribes))+ ?x2 . ?x0 (:pfriendOf)+ ?x3 . ?x0 (^:pfriendOf)+ ?x4 . }"
+    ]
+}

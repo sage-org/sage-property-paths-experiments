@@ -1,0 +1,1 @@
+PREFIX : <http://example.org/gmark/> SELECT ?x2 WHERE { :User_8090777 (((^:peditor/:peditor)))+ ?x1 . ?x1 (:plike/^:plike) ?x2 . }

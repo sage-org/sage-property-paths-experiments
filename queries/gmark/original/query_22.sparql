@@ -1,0 +1,1 @@
+PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x1 WHERE { ?x0 (((:phomepage/^:phomepage)))+ ?x1 . ?x0 (((:peditor/^:pfriendOf)))+ ?x2 . ?x0 (((:peditor/^:previewer/^:phasReview))) ?x3 . }

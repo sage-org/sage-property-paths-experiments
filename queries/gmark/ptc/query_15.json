@@ -1,0 +1,6 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT ?x1 ?x2 ?x0 WHERE { ?x0 (((:pcontactPoint/^:pcontactPoint)|(:pcontactPoint/:pfriendOf/^:pemployee)))+ ?x1 . ?x1 (:pemployee/^:previewer/^:phasReview) ?x2 . ?x2 (:pconductor/^:pfriendOf/^:pconductor) ?x3 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x1 ?x2 WHERE { ?x0 ((:pcontactPoint/^:pcontactPoint)|(:pcontactPoint/:pfriendOf/^:pemployee))+ ?x1 . ?x1 (:pemployee) ?v0 . ?v0 (^:previewer) ?v1 . ?v1 (^:phasReview) ?x2 . ?x2 (:pconductor) ?v2 . ?v2 (^:pfriendOf) ?v3 . ?v3 (^:pconductor) ?x3 . }"
+    ]
+}

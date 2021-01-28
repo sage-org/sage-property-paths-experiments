@@ -1,0 +1,57 @@
+{
+    "settings": {
+        "plot1": {
+            "title": "DepthMax impacts executing the gmark queries",
+            "settings": {
+                "depths": ["2", "3", "5", "10"],
+                "dataset": "gmark",
+                "queries": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+                "runs": 3,
+                "warmup": false
+            }
+        },
+        "plot2" : {
+            "title": "Time quantum impacts executing the gmark queries",
+            "settings": {
+                "quantums": ["500ms", "1sec", "60sec"],
+                "dataset": "gmark",
+                "queries": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+                "runs": 3,
+                "warmup": false
+            }
+        },
+        "plot3": {
+            "title": "Performance of the SaGe-PTC approach compared to Virtuoso, Jena and SaGe-Multi over the gmark dataset",
+            "settings": {
+                "approaches": ["SaGe-PTC-5", "SaGe-PTC-20", "Jena-Fuseki", "SaGe-Multi"],
+                "dataset": "gmark",
+                "queries": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+                "runs": 3,
+                "warmup": false
+            }
+        },
+        "plot4": {
+            "title": "Performance of the SaGe-PTC approach compared to Virtuoso, Jena and SaGe-Multi over the wikidata dataset",
+            "settings": {
+                "approaches": ["SaGe-PTC-5", "SaGe-PTC-20", "Jena-Fuseki", "SaGe-Multi"],
+                "dataset": "wikidata",
+                "queries": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+                "runs": 3,
+                "warmup": false
+            }
+        }
+    },
+    "information": {
+        "ports": {
+            "sage-k2-60sec": "8080",
+            "sage-k3-60sec": "8081",
+            "sage-k5-60sec": "8082",
+            "sage-k10-60sec": "8083",
+            "sage-k20-500ms": "8084",
+            "sage-k20-1sec": "8085",
+            "sage-k20-60sec": "8086",
+            "virtuoso": "8890",
+            "fuseki": "3030"
+        }
+    }
+}

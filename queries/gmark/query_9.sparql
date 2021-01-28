@@ -1,1 +1,0 @@
-PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x3 WHERE {  ?x0 (:peditor/:plike/:phasReview) ?x1 . ?x1 (^:phasReview/:partist) ?x2 .  ?x2 (:pfriendOf)+ ?x3 .  }

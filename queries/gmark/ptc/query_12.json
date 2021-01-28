@@ -1,0 +1,6 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT ?x2 WHERE { :User_8090777 (((^:peditor/:peditor)))+ ?x1 . ?x1 (:plike/^:plike) ?x2 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x2 WHERE { :User_8090777 ((^:peditor/:peditor))+ ?x1 . ?x1 (:plike) ?v0 . ?v0 (^:plike) ?x2 . }"
+    ]
+}

@@ -1,0 +1,7 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT  ?x0 WHERE { ?x0 (((:phomepage/^:phomepage)|(:phomepage/^:phomepage)))+ ?x1 . ?x0 (((:partist/:plike))) ?x2 . ?x1 (((:partist/:pmakesPurchase/:ppurchaseFor)|(:partist/^:previewer/^:phasReview))) ?x3 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE { ?x0 ((:phomepage/^:phomepage)|(:phomepage/^:phomepage))+ ?x1 . ?x0 (:partist) ?v0 . ?v0 (:plike) ?x2 . ?x1 (:partist) ?v1 . ?v1 (:pmakesPurchase) ?v2 . ?v2 (:ppurchaseFor) ?x3 . }",
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE { ?x0 ((:phomepage/^:phomepage)|(:phomepage/^:phomepage))+ ?x1 . ?x0 (:partist) ?v0 . ?v0 (:plike) ?x2 . ?x1 (:partist) ?v1 . ?v1 (^:previewer) ?v2 . ?v2 (^:phasReview) ?x3 . }"
+    ]
+}

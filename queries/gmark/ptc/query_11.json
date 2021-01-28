@@ -1,0 +1,7 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x2 WHERE { ?x0 (((:pfriendOf)))+ ?x1 . ?x1 (((^:pconductor/:phomepage/^:phomepage))) ?x2 .  }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x2 WHERE { ?x1 (^:pconductor) ?v0 . ?v0 (:phomepage) ?v1 . ?v1 (^:phomepage) ?x2 . ?x0 (((:pfriendOf)))+ ?x1 . }"
+    ]
+    
+}

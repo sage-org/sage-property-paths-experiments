@@ -1,0 +1,7 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE {   ?x0 (^:pexpires) ?x1 . ?x1 (((:pauthor/^:peditor))) ?x2 . ?x2 ((:peditor/^:pauthor))+ ?x3 . ?x3 (((^:pincludes/:pincludes)|(^:ppurchaseFor/^:pmakesPurchase/^:peditor))) ?x4 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE { ?x0 (^:pexpires) ?x1 . ?x1 (:pauthor) ?v0 . ?v0 (^:peditor) ?x2 . ?x2 ((:peditor/^:pauthor))+ ?x3 . ?x3 (^:pincludes) ?v1 . ?v1 (:pincludes) ?x4 . }",
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE { ?x0 (^:pexpires) ?x1 . ?x1 (:pauthor) ?v0 . ?v0 (^:peditor) ?x2 . ?x2 ((:peditor/^:pauthor))+ ?x3 . ?x3 (^:ppurchaseFor) ?v1 . ?v1 (^:pmakesPurchase) ?v2 . ?v2 (^:peditor) ?x4 . }"
+    ]
+}

@@ -1,1 +1,0 @@
-PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE {   ?x0 ((^:plocation/^:pfriendOf)|(^:plocation)) ?x1 . ?x1 ((:pfollows)|(^:pfriendOf/:pfriendOf/:pfollows)) ?x2 . ?x2 (((^:peditor/:phasReview/:previewer)))+ ?x3 .  }

@@ -1,0 +1,7 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT  ?x2 ?x1 ?x0 WHERE { ?x0 (((:pauthor/:psubscribes/^:phomepage)|(:peditor/^:pfriendOf/^:pauthor)))+ ?x1 . ?x0 ((:pauthor/^:previewer/^:phasReview)) ?x2 . ?x0 (((:phasReview/:previewer/^:pauthor)|(^:ppurchaseFor/^:pmakesPurchase/^:pauthor))) ?x3 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE { ?x0 ((:pauthor/:psubscribes/^:phomepage)|(:peditor/^:pfriendOf/^:pauthor))+ ?x1 . ?x0 (:pauthor) ?v0 . ?v0 (^:previewer) ?v1 . ?v1 (^:phasReview) ?x2 . ?x0 (:phasReview) ?v2 . ?v2 (:previewer) ?v3 . ?v3 (^:pauthor) ?x3 . }",
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 WHERE { ?x0 ((:pauthor/:psubscribes/^:phomepage)|(:peditor/^:pfriendOf/^:pauthor))+ ?x1 . ?x0 (:pauthor) ?v0 . ?v0 (^:previewer) ?v1 . ?v1 (^:phasReview) ?x2 . ?x0 (^:ppurchaseFor) ?v2 . ?v2 (^:pmakesPurchase) ?v3 . ?v3 (^:pauthor) ?x3 . }"
+    ]   
+}

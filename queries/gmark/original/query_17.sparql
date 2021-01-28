@@ -1,0 +1,1 @@
+PREFIX : <http://example.org/gmark/> SELECT  ?x0 WHERE { ?x0 (^:plike/^:pconductor/^:pincludes) ?x1 . ?x1 ((:pincludes/^:pincludes))+ ?x2 . ?x2 ((:pincludes/:pauthor/^:partist)) ?x3 . }

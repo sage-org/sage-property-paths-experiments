@@ -1,0 +1,8 @@
+[submodule "clients/sage-multi-engine"]
+	path = clients/sage-multi-engine
+	url = https://github.com/JulienDavat/sparql-engine.git
+	branch = property-paths
+[submodule "servers/sage-ptc"]
+	path = servers/sage-ptc
+	url = https://github.com/JulienDavat/sage-engine.git
+	branch = extended-property-paths

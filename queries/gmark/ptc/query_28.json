@@ -1,0 +1,9 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x1 ?x2 WHERE { ?x0 ((:peditor/:plike)|(:pauthor/:pfollows/:plike)) ?x1 . ?x1 (:partist/^:pfollows) ?x2 . ?x2 ((^:pconductor/^:pincludes/:pincludes)|(^:peditor)) ?x3 . ?x3 (((:peditor/^:pauthor)))+ ?x4 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x1 ?x2 WHERE { ?x0 (:peditor) ?v0 . ?v0 (:plike) ?x1 . ?x1 (:partist) ?v1 . ?v1 (^:pfollows) ?x2 . ?x2 (^:pconductor) ?v2 . ?v2 (^:pincludes) ?v3 . ?v3 (:pincludes) ?x3 . ?x3 ((:peditor/^:pauthor))+ ?x4 . }",
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x1 ?x2 WHERE { ?x0 (:peditor) ?v0 . ?v0 (:plike) ?x1 . ?x1 (:partist) ?v1 . ?v1 (^:pfollows) ?x2 . ?x2 (^:peditor) ?x3 . ?x3 ((:peditor/^:pauthor))+ ?x4 . }",
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x1 ?x2 WHERE { ?x0 (:pauthor) ?v0 . ?v0 (:pfollows) ?v1 . ?v1 (:plike) ?x1 . ?x1 (:partist) ?v2 . ?v2 (^:pfollows) ?x2 . ?x2 (^:pconductor) ?v3 . ?v3 (^:pincludes) ?v4 . ?v4 (:pincludes) ?x3 . ?x3 ((:peditor/^:pauthor))+ ?x4 . }",
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x1 ?x2 WHERE { ?x0 (:pauthor) ?v0 . ?v0 (:pfollows) ?v1 . ?v1 (:plike) ?x1 . ?x1 (:partist) ?v2 . ?v2 (^:pfollows) ?x2 . ?x2 (^:peditor) ?x3 . ?x3 ((:peditor/^:pauthor))+ ?x4 . }"
+    ]
+}

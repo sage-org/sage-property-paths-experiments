@@ -1,0 +1,7 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x3 WHERE { ?x0 ((:pconductor/:plike/^:pincludes)) ?x1 . ?x1 (((:pincludes/^:pincludes)))+ ?x2 . ?x2 ((:peligibleQuantity)|(:pincludes/:pcontentRating)) ?x3 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x3 WHERE { ?x0 (:pconductor) ?v0 . ?v0 (:plike) ?v1 . ?v1 (^:pincludes) ?x1 . ?x1 ((:pincludes/^:pincludes))+ ?x2 . ?x2 (:peligibleQuantity) ?x3 . }",
+        "PREFIX : <http://example.org/gmark/> SELECT ?x0 ?x3 WHERE { ?x0 (:pconductor) ?v0 . ?v0 (:plike) ?v1 . ?v1 (^:pincludes) ?x1 . ?x1 ((:pincludes/^:pincludes))+ ?x2 . ?x2 (:pincludes) ?v2 . ?v2 (:pcontentRating) ?x3 . }"
+    ]
+}

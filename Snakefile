@@ -1,98 +1,43 @@
-# GMark
+# QUERIES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+# QUERIES = [1, 2, 3]
+# RUNS = [1, 2, 3]
 
-rule gmark_run_sage_ptc:
-    output:
-        'output/gmark/sage_ptc.csv'
-    shell:
-        'node ./scripts/sage-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -w ./scripts/ptc-client/gmark_queries.json --timeout 1800'
+configfile: "configs/xp.json"
 
-rule gmark_run_sage_client_ptc:
-    output:
-        'output/gmark/sage_client_ptc.csv'
-    shell:
-        'node ./scripts/sage-client-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -w ./scripts/ptc-client/gmark_queries.json --timeout 1800'
+####################################################################################################
+########## INITIALIZATION ##########################################################################
+####################################################################################################
 
-rule gmark_run_sage_client_multi:
-    output:
-        'output/gmark/sage_client_multi.csv'
-    shell:
-        'node ./scripts/query-sage.js http://localhost:8080/sparql http://example.org/datasets/hdt/shop10M {output} -d ./queries/gmark --method multi --timeout 1800'
+onstart:
+    shell('mkdir -p output/log')
+    shell('bash scripts/start_servers.sh')
+    print('Starting all servers...')
 
-rule gmark_run_virtuoso:
-    output:
-        'output/gmark/virtuoso.csv'
-    shell:
-        'python ./scripts/query-endpoint.py virtuoso http://localhost:8890/sparql http://example.org/datasets/shop10M {output} -d ./queries/gmark --timeout 1800'
+onsuccess:
+    shell('bash scripts/stop_servers.sh')
+    print('Shutting down all servers')
 
-rule gmark_run_fuseki:
-    output:
-        'output/gmark/fuseki.csv'
-    shell:
-        'python ./scripts/query-endpoint.py fuseki http://localhost:8890/sparql http://example.org/datasets/shop10M {output} -d ./queries/gmark --timeout 1800'
+onerror:
+    shell('bash scripts/stop_servers.sh')
+    print('Shutting down all servers')
 
-rule gmark_quantum_impact:
-    input:
-        ancient('output/gmark/sage_ptc_60sec.csv'),
-        ancient('output/gmark/sage_ptc_10sec.csv'),
-        ancient('output/gmark/sage_ptc_1sec.csv')
-    output:
-        'output/gmark/quantum_impact.csv'
-    shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
+####################################################################################################
+########## DEPENDENCIES ############################################################################
+####################################################################################################
 
-rule gmark_tpc_client_k_impact:
-    input:
-        ancient('output/gmark/sage_client_ptc_2.csv'),
-        ancient('output/gmark/sage_client_ptc_5.csv'),
-        ancient('output/gmark/sage_client_ptc_10.csv')
-    output:
-        'output/gmark/quantum_impact.csv'
-    shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
+def last_run(plot):
+    runs = config["settings"][f"plot{plot}"]["settings"]["runs"]
+    if config["settings"][f"plot{plot}"]["settings"]["warmup"]:
+        return runs + 1
+    else:
+        return runs
 
-rule gmark_approaches_comparison:
-    input:
-        ancient('output/gmark/sage_ptc_60sec.csv'),
-        ancient('output/gmark/sage_client_ptc_5.csv'),
-        ancient('output/gmark/fuseki.csv'),
-        ancient('output/gmark/virtuoso.csv')
-    output:
-        'output/gmark/approaches_comparison.csv'
-    shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
+def first_run(plot):
+    if config["settings"][f"plot{plot}"]["settings"]["warmup"]:
+        return 2
+    else:
+        return 1
 
-# Wikidata
-
-rule wikidata_run_sage_ptc:
-    output:
-        'output/wikidata/sage_ptc.csv'
-    shell:
-        'node ./scripts/sage-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/wikidata {output} -d ./queries/wikidata --timeout 1800'
-
-rule wikidata_run_sage_client_ptc:
-    output:
-        'output/wikidata/sage_client_ptc.csv'
-    shell:
-        'node ./scripts/sage-client-ptc.js http://localhost:8080/sparql http://example.org/datasets/hdt/wikidata {output} --workload Wikidata --timeout 1800'
-
-rule wikidata_run_sage_client_multi:
-    output:
-        'output/wikidata/sage_client_multi.csv'
-    shell:
-        'node ./scripts/query-sage.js http://localhost:8080/sparql http://example.org/datasets/hdt/wikidata {output} -d ./queries/wikidata --method multi --timeout 1800'
-
-rule wikidata_run_fuseki:
-    output:
-        'output/wikidata/fuseki.csv'
-    shell:
-        'python ./scripts/query-endpoint.py fuseki http://localhost:8890/sparql http://example.org/datasets/wikidata {output} -d ./queries/wikidata --timeout 1800'
-
-rule wikidata_approaches_comparison:
-    input:
-        ancient('output/wikidata/sage_ptc_60sec.csv'),
-        ancient('output/wikidata/sage_client_ptc_5.csv'),
-        ancient('output/wikidata/fuseki.csv')
-    output:
-        'output/wikidata/approaches_comparison.csv'
-    shell:
-        'bash ./scripts/merge_csv.sh {input} > {output}'
+include: 'rules/plot1.smk'
+include: 'rules/plot2.smk'
+include: 'rules/plot3.smk'

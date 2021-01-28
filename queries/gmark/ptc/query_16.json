@@ -1,0 +1,6 @@
+{
+    "original": "PREFIX : <http://example.org/gmark/> SELECT  ?x0 ?x1 WHERE { ?x0 (((^:pincludes/:pincludes)|(:pconductor/^:pconductor)))+ ?x1 . ?x0 (((:phomepage/^:phomepage)|(^:ppurchaseFor/^:pmakesPurchase/^:pconductor)))+ ?x2 . }",
+    "subqueries": [
+        "PREFIX : <http://example.org/gmark/> SELECT ?x1 ?x0 ?x2 WHERE { ?x0 ((^:pincludes/:pincludes)|(:pconductor/^:pconductor))+ ?x1 . ?x0 ((:phomepage/^:phomepage)|(^:ppurchaseFor/^:pmakesPurchase/^:pconductor))+ ?x2 . }"
+    ]
+}
