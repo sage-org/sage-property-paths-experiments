@@ -22,6 +22,12 @@ property path online and deliver complete results. Experimental results
 demonstrate that our approach outperforms existing smart client solutions 
 in terms of HTTP calls, data transfer and query execution time.
 
+# Approach illustration
+
+**Figure**: First iteration of eval(Q3) as defined in Algorithm 3 over the dataset D with MaxDepth = 1
+
+![](output/figures/workflow_ptc.png?raw=true)
+
 # Experimental results
 
 ## Dataset and Queries
@@ -32,6 +38,41 @@ complex property path query workloads. We generate a graph instance having 7,533
 30 queries for the "Shop" gMark scenario. All our queries contain from one to four
 transitive path expressions.
 
+## Compared Approaches
+
+In our experiments, we compare the following approaches:
+- **SaGe-PTC** is the implementation of the PTC approach defined in our paper. The server-side algorithm 
+is implemented on the SaGe server. The code is available [here](https://github.com/JulienDavat/sage-engine/blob/e4eb688c72bd635115ffc8e10a049baf81709fd6/sage/query_engine/iterators/ppaths/v2/simple_depth_annotation_memory.py). The client-side algorithm 
+is implemented in javascript. The code is available [here](https://github.com/JulienDavat/property-paths-experiments/blob/main/clients/sage-ptc/src/engine.js). We use the HDT backend of the 
+SaGe server to store the gMark dataset. The server is configured with a page size limit of 10000 triples 
+and 10000 control tuples. Concerning the *quantum* and the *MaxDepth* parameters, we use different settings 
+in our experiments:
+    - **SaGe-PTC-2** is configured with a time quantum of 60 seconds and a MaxDepth of 2.
+    - **SaGe-PTC-3** is configured with a time quantum of 60 seconds and a MaxDepth of 3.
+    - **SaGe-PTC-5** is configured with a time quantum of 60 seconds and a MaxDepth of 5.
+    - **SaGe-PTC-10** is configured with a time quantum of 60 seconds and a MaxDepth of 10.
+    - **SaGe-PTC-20** is configured with a time quantum of 60 seconds and a MaxDepth of 20.
+    - **SaGe-PTC-500ms** is configured with a time quantum of 500 ms and a MaxDepth of 20.
+    - **SaGe-PTC-1sec** is configured with a time quantum of 1 second and a MaxDepth of 20.
+    - **SaGe-PTC-60sec** is configured with a time quantum of 60 seconds and a MaxDepth of 20.
+- **SaGe-Multi** is the implementation of the multi-predicate automaton based approach defined in [[1]](https://hal.archives-ouvertes.fr/hal-03011805/document).
+SaGe-Multi is a SaGe smart client and interacts with the same server as SaGe-PTC, configured with a
+time quantum of 60 seconds.
+- **Virtuoso** is the Virtuoso SPARQL endpoint (v7.2.5 as of December 2020). Virtuoso is configured
+*without quotas* in order to deliver complete results, and with a single thread per query.
+- **Jena-Fuseki** is the Apache Jena Fuseki endpoint (v3.17.0). Fuseki is configured as Virtuoso, i.e.
+without quotas and a single thread per query.
+
+
+## Evaluation Metrics
+- **Execution time** is the total time between starting the query execution and
+the production of the final results by the client.
+- **Data transfer** is the total number of bytes transferred from the server to 
+the client during the query execution.
+- **Number of HTTP calls** is the total number of HTTP calls issued by the
+client during the query execution.
+
+
 ## Machine configuration on GCP (Google Cloud Platform)
 
 - type: `c2-standard-4 :4 vCPU, 15 Go of memory`
@@ -41,17 +82,17 @@ transitive path expressions.
 
 ## Plots
 
-**Plot 1 legend**: Statistics about the evaluation of the gmark queries in terms of execution time, data transfer
+**Plot 1**: Statistics about the evaluation of the gmark queries in terms of execution time, data transfer
 and number of http calls for different time quantum.
 
 ![](output/figures/quantum-impacts/gmark/figure.png?raw=true)
 
-**Plot 2 legend**: Statistics about the evaluation of the gmark queries in terms of execution time, data transfer
+**Plot 2**: Statistics about the evaluation of the gmark queries in terms of execution time, data transfer
 and number of http calls for different MaxDepth value.
 
 ![](output/figures/depth-impacts/gmark/figure.png?raw=true)
 
-**Plot 3 legend**: Execution time, data transfer and number of http calls for the gmark queries
+**Plot 3**: Execution time, data transfer and number of http calls for the gmark queries
 
 ![](output/figures/performance/gmark/execution_time.png?raw=true)
 ![](output/figures/performance/gmark/data_transfer.png?raw=true)
@@ -63,9 +104,9 @@ and number of http calls for different MaxDepth value.
 
 To run our experiments, the following softwares and packages have to be installed on your system.
 * [Virtuoso](https://github.com/openlink/virtuoso-opensource/releases/tag/v7.2.5) (v7.2.5)
-* [NodeJS](https://nodejs.org/en/) (v14.15.4)
-* [Python3.7]() and [Python3.7-dev]()
-* [Virtualenv]() (for Python3.7)
+* [NodeJS](https://nodejs.org/en) (v14.15.4)
+* [Python3.7](https://www.python.org) and [Python3-dev]()
+* [Virtualenv](https://pypi.org/project/virtualenv) (v20.4.0)
 
 **Caution:** The default location of Virtuoso is ```/usr/local/virtuoso-opensource```. If you
 change it during the installation of Virtuoso, please update the
@@ -99,7 +140,7 @@ bash install.sh
 All the datasets used in our experiments are available online:
 - **The gmark dataset** is available in the [.hdt]() and [.nt]() formats
 
-First, download all **.hdt** datasets into the **graphs** directory.
+First, download all **.hdt** and **.nt** datasets into the **graphs** directory.
 
 ### Ingest data in Virtuoso
 
@@ -181,4 +222,26 @@ snakemake --cores 1 output/figures/depth-impacts/gmark/figure.png
 
 # Compares the different approaches in terms of execution time, data transfer and number of http calls using the gmark queries
 snakemake --cores 1 output/figures/performance/gmark/{nb_calls,data_transfer,execution_time}.png
+```
+
+It is also possible to run each part of our experiments without Snakemake. For example, some important commands are given below:
+
+```bash
+# to start the SaGe server
+sage $CONFIG_FILE -w $NB_WORKERS -p $PORT 
+
+# to start the Virtuoso server on the port 8890
+${VIRTUOSO_DIRECTORY}/bin/virtuoso-t -f -c ${VIRTUOSO_DIRECTORY}/var/lib/virtuoso/db/virtuoso.ini
+
+# to evaluate a query with the SaGe-PTC approach
+node clients/sage-ptc/bin/interface.js $SERVER_URL $GRAPH_IRI --file $QUERY --measure $OUT_STATS --output $OUT_RESULT
+
+# to evaluate a query with the SaGe-Multi approach
+node clients/sage-multi/bin/interface.js $SERVER_URL $GRAPH_IRI --file $QUERY --measure $OUT_STATS --output $OUT_RESULT
+
+# to evaluate a query with Virtuoso
+python clients/endpoints/interface.py virtuoso $SERVER_URL $GRAPH_IRI --file $QUERY --measure $OUT_STATS --output $OUT_RESULT
+
+# to evaluate a query with Jena-Fuseki
+python clients/endpoints/interface.py fuseki $SERVER_URL $GRAPH_IRI --file $QUERY --measure $OUT_STATS --output $OUT_RESULT
 ```
