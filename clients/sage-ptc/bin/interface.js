@@ -36,11 +36,11 @@ async function execute(server, graph, query) {
     let result_set = await new PTCClient(server, graph, spy).execute(query, program.timeout, !program.notExpandFrontiers)
     let elapsed_time = (Date.now() - start_time) / 1000.0
     // Retrieves query execution statistics
-    let execution_time = (program.timeout > 0 && elapsed_time > timeout) ? program.timeout : elapsed_time
+    let execution_time = (program.timeout > 0 && elapsed_time > program.timeout) ? program.timeout : elapsed_time
     let nb_calls = spy.nb_http_calls
     let data_transfer = spy.data_transfer
     let data_transfer_approach_overhead = spy.control_tuples_size
-    let data_transfer_duplicates_overhead = Math.ceil( result_set.nb_duplicates / (result_set.nb_solutions + result_set.nb_duplicates) ) * data_transfer
+    let data_transfer_duplicates_overhead = ( result_set.nb_duplicates / (result_set.nb_solutions + result_set.nb_duplicates) ) * spy.solutions_size
     let nb_results = result_set.nb_solutions
     let nb_duplicates = result_set.nb_duplicates
     let state = 'complete'
@@ -61,7 +61,7 @@ async function execute(server, graph, query) {
             nb_duplicates,
             state
         ]
-        data += row.join(',') + '\n'
+        let data = row.join(',') + '\n'
         fs.writeFileSync(program.measure, data, {encoding: 'utf-8'})
     }
     // Writes the query result in the given file

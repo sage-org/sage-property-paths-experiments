@@ -109,7 +109,7 @@ async function execute(server, graph, query) {
     let [solutions, statistics] = await eval(server, graph, query)
     // Write the query execution statistics in the given file
     if (program.measure) {
-        data += statistics.join(',') + '\n'
+        let data = statistics.join(',') + '\n'
         fs.writeFileSync(program.measure, data, {encoding: 'utf-8'})
     }
     // Writes the query result in the given file

@@ -60,8 +60,8 @@ SaGe-Multi is a SaGe smart client and interacts with the same server as SaGe-PTC
 time quantum of 60 seconds.
 - **Virtuoso** is the Virtuoso SPARQL endpoint (v7.2.5 as of December 2020). Virtuoso is configured
 *without quotas* in order to deliver complete results, and with a single thread per query.
-- **Jena-Fuseki** is the Apache Jena Fuseki endpoint (v3.17.0). Fuseki is configured as Virtuoso, i.e.
-without quotas and a single thread per query.
+- **Jena-Fuseki** is the Apache Jena Fuseki endpoint (v3.17.0). The gMark dataset is stored in a TDB
+database.
 
 
 ## Evaluation Metrics
@@ -82,17 +82,17 @@ client during the query execution.
 
 ## Plots
 
-**Plot 1**: Statistics about the evaluation of the gmark queries in terms of execution time, data transfer
+**Plot 1**: Statistics about the evaluation of the 30 gmark queries in terms of execution time, data transfer
 and number of http calls for different time quantum.
 
 ![](output/figures/quantum-impacts/gmark/figure.png?raw=true)
 
-**Plot 2**: Statistics about the evaluation of the gmark queries in terms of execution time, data transfer
+**Plot 2**: Statistics about the evaluation of the 30 gmark queries in terms of execution time, data transfer
 and number of http calls for different MaxDepth value.
 
 ![](output/figures/depth-impacts/gmark/figure.png?raw=true)
 
-**Plot 3**: Execution time, data transfer and number of http calls for the gmark queries
+**Plot 3**: Execution time, data transfer and number of http calls for the 30 gmark queries
 
 ![](output/figures/performance/gmark/execution_time.png?raw=true)
 ![](output/figures/performance/gmark/data_transfer.png?raw=true)
@@ -107,23 +107,36 @@ To run our experiments, the following softwares and packages have to be installe
 * [NodeJS](https://nodejs.org/en) (v14.15.4)
 * [Python3.7](https://www.python.org) and [Python3-dev]()
 * [Virtualenv](https://pypi.org/project/virtualenv) (v20.4.0)
+* [Apache-Jena-Fuseki](https://jena.apache.org/documentation/fuseki2/) (v3.17.0)
 
-**Caution:** The default location of Virtuoso is ```/usr/local/virtuoso-opensource```. If you
-change it during the installation of Virtuoso, please update the
+**Caution:** In the next sections, we assume that Virtuoso is installed at its default location 
+```/usr/local/virtuoso-opensource``` and Fuseki is installed in the ```servers/fuseki```
+directory. If you change the location of Virtuoso or Fuseki, do not forget to propagate this
+change in the next instructions and please update the
 [start_server.sh](https://github.com/JulienDavat/sage-sparql-void/blob/master/scripts/start_servers.sh) and
 [stop_server.sh](https://github.com/JulienDavat/sage-sparql-void/blob/master/scripts/stop_servers.sh) scripts.
 
 ## Configuration
 
 **Virtuoso** needs to be configured to use a single thread per query and to disable quotas.
-First open the file ```${VIRTUOSO_DIRECTORY}/var/lib/virtuoso/db/virtuoso.ini``` and apply
-the following changes:
-- In the *SPARQL* section
-    - set *ResultSetMaxRows*, *MaxQueryCostEstimationTime* and *MaxQueryExecutionTime* to **10^9** in order to disable quotas
-- In the *Parameters* section
-    - set *MaxQueryMem*, *NumberOfBuffers* and *MaxDirtyBuffers* to an appropriate value based on the amount of space available on your system
-    - set *ThreadsPerQuery* to **1**
-    - add your *home* directory to *DirsAllowed*
+- In the *\[SPARQL\]* section of the file ```/usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini```
+    - set *ResultSetMaxRows*, *MaxQueryCostEstimationTime* and *MaxQueryExecutionTime* to **10^9** in order to disable quotas.
+- In the *Parameters* section of the file ```/usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini```
+    - set *\[MaxQueryMem\]*, *NumberOfBuffers* and *MaxDirtyBuffers* to an appropriate value based on the 
+    amount of RAM available on your machine. In our experiments, we used the settings recommended for 
+    a machine with 8Go of RAM.
+    - set *ThreadsPerQuery* to **1**.
+    - add your *home* directory to *DirsAllowed*.
+- At the end of the file ```/usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini``` add a new section
+named *\[Flags\]*. In this new section, add a new parameter *tn_max_memory*. The parameter *tn_max_memory* allow to
+increase the allocated space used to compute transitive closures. We set this parameter to **2000000000** (bytes) 
+in our experiments. You can adapt this value according to the amount of RAM available on your machine.
+
+**Apache Jena Fuseki** needs to be configured as Virtuoso. 
+- open the file ```servers/fuseki/fuseki-server``` and set the java heap memory to an appropriate value
+based on the amount of space available on your machine. In our experiments, we set it to 8Go.
+- copy the file ```configs/fuseki/gmark.ttl``` into the directory ```servers/fuseki/run/configuration```.
+- set the *FUSEKI_BASE* environement variable to ```servers/fuseki/run```.
 
 ## Project installation
 
@@ -145,10 +158,17 @@ First, download all **.hdt** and **.nt** datasets into the **graphs** directory.
 ### Ingest data in Virtuoso
 
 ```bash
-# Loading all .nt files in the graphs directory
+# Loads all .nt files in the graphs directory
 isql "EXEC=ld_dir('${PROJECT_DIRECTORY}/graphs', '*.nt', 'http://example.org/datasets/default');"
 isql "EXEC=rdf_loader_run();"
 isql "EXEC=checkpoint;"
+```
+
+### Ingest data in Apache Jena Fuseki
+
+```bash
+# Loads the gmark dataset in Apache Jena Fuseki
+ruby servers/fuseki/bin/s-put http://localhost:3030/gmark default graphs/gmark.nt
 ```
 
 ## Experiments configuration
@@ -231,7 +251,7 @@ It is also possible to run each part of our experiments without Snakemake. For e
 sage $CONFIG_FILE -w $NB_WORKERS -p $PORT 
 
 # to start the Virtuoso server on the port 8890
-${VIRTUOSO_DIRECTORY}/bin/virtuoso-t -f -c ${VIRTUOSO_DIRECTORY}/var/lib/virtuoso/db/virtuoso.ini
+/usr/local/virtuoso-opensource/bin/virtuoso-t -f -c /usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini
 
 # to evaluate a query with the SaGe-PTC approach
 node clients/sage-ptc/bin/interface.js $SERVER_URL $GRAPH_IRI --file $QUERY --measure $OUT_STATS --output $OUT_RESULT

@@ -26,17 +26,24 @@ if statistics_file is None or output_directory is None:
 
 def transform_bytes_to_kbytes(data):
     data['data_transfer'] = data['data_transfer'].div(1024)
+    data['data_transfer_approach_overhead'] = data['data_transfer_approach_overhead'].div(1024)
+    data['data_transfer_duplicates_overhead'] = data['data_transfer_duplicates_overhead'].div(1024)
 
 def sort_by_approach(data):
-    data['order'] = data['approach'].str.split('-').str[-1]
-    data['order'] = data['order'].astype(int)
-    # data.loc[data['approach'] == 'SaGe-PTC-500ms', 'order'] = 1
-    # data.loc[data['approach'] == 'SaGe-PTC-1sec', 'order'] = 2
-    # data.loc[data['approach'] == 'SaGe-PTC-60sec', 'order'] = 3
+    data.loc[data['approach'] == 'SaGe-PTC-500ms', 'order'] = 1
+    data.loc[data['approach'] == 'SaGe-PTC-1sec', 'order'] = 2
+    data.loc[data['approach'] == 'SaGe-PTC-60sec', 'order'] = 3
+
+    data.loc[data['approach'] == 'SaGe-PTC-2', 'order'] = 1
+    data.loc[data['approach'] == 'SaGe-PTC-3', 'order'] = 2
+    data.loc[data['approach'] == 'SaGe-PTC-5', 'order'] = 3
+    data.loc[data['approach'] == 'SaGe-PTC-10', 'order'] = 4
+    data.loc[data['approach'] == 'SaGe-PTC-20', 'order'] = 5
+
     return data.sort_values(by=['order', 'query'])
 
 def add_lantency(data):
-    data['execution_time'] = data['execution_time'] + (data['http_calls'] * 0.1)
+    data['execution_time'] = data['execution_time'] + (data['nb_calls'] * 0.1)
 
 def filter_timeout_and_errors(data):
     discarded_queries = data[(data['state'] == 'error') | (data['state'] == 'timeout')]['query'].unique()
@@ -60,7 +67,7 @@ def plot_metric(ax, data, metric, title, xlabel, ylabel, logscale=False):
 
 def create_figure(data, logscale=False):
     fig = plt.figure(figsize=(8, 4))
-    plt.subplots_adjust(wspace=0.5, bottom=0.25, top=0.98)
+    plt.subplots_adjust(wspace=0.8, bottom=0.25, top=0.98)
     ax1 = fig.add_subplot(131)
     plot_metric(ax1, data, 'execution_time', '', '', 'execution time (sec)', logscale=logscale)
     plt.legend().remove()
@@ -68,7 +75,7 @@ def create_figure(data, logscale=False):
     plot_metric(ax2, data, 'data_transfer', '', '', 'data transferred (KBytes)', logscale=logscale)
     plt.legend().remove()
     ax3 = fig.add_subplot(133)
-    plot_metric(ax3, data, 'http_calls', '', '', 'number of HTTP calls', logscale=logscale)
+    plot_metric(ax3, data, 'nb_calls', '', '', 'number of HTTP calls', logscale=logscale)
     plt.legend().remove()
     return fig
 

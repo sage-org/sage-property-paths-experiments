@@ -29,9 +29,11 @@ def transform_ms_to_sec(data):
 
 def transform_bytes_to_kbytes(data):
     data['data_transfer'] = data['data_transfer'].div(1024)
+    data['data_transfer_approach_overhead'] = data['data_transfer_approach_overhead'].div(1024)
+    data['data_transfer_duplicates_overhead'] = data['data_transfer_duplicates_overhead'].div(1024)
 
 def transform_queries_name(data):
-    data['query'] = data['query'].str.split('_').str[-1]
+    data['query'] = data['query'].str[1:]
     data['query'] = data['query'].astype(int)
 
 def sort_by_query_names(data):
@@ -46,11 +48,11 @@ def sort_by_approach(data):
     return data.sort_values(by=['order', 'query'])
 
 def add_lantency(data):
-    data['execution_time'] = data['execution_time'] + (data['http_calls'] * 0.1)
+    data['execution_time'] = data['execution_time'] + (data['nb_calls'] * 0.1)
 
 def handle_timeout_and_errors(data):
-    data['http_calls'] = np.where(data['state'] == 'timeout', data['http_calls'].max(), data['http_calls'])
-    data['http_calls'] = np.where(data['state'] == 'error', data['http_calls'].max(), data['http_calls'])
+    data['nb_calls'] = np.where(data['state'] == 'timeout', data['nb_calls'].max(), data['nb_calls'])
+    data['nb_calls'] = np.where(data['state'] == 'error', data['nb_calls'].max(), data['nb_calls'])
     data['execution_time'] = np.where(data['state'] == 'timeout', data['execution_time'].max(), data['execution_time'])
     data['execution_time'] = np.where(data['state'] == 'error', data['execution_time'].max(), data['execution_time'])
     data['data_transfer'] = np.where(data['state'] == 'timeout', data['data_transfer'].max(), data['data_transfer'])
@@ -94,17 +96,28 @@ def create_figure(data, metric, title, xlabel, ylabel, logscale=False):
     first = data[(data['query'] > 0) & (data['query'] <= 10)]
     second = data[(data['query'] > 10) & (data['query'] <= 20)]
     third = data[(data['query'] > 20) & (data['query'] <= 30)]
+
     fig = plt.figure(figsize=(8, 6))
     plt.subplots_adjust(hspace=0.3)
-    ax1 = fig.add_subplot(311)
-    plot_metric(ax1, first, metric, title, '', '', logscale=logscale)
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), fancybox=True, shadow=True, ncol=5)
-    ax2 = fig.add_subplot(312)
-    plot_metric(ax2, second, metric, '', xlabel, ylabel, logscale=logscale)
-    plt.legend().remove()
-    ax3 = fig.add_subplot(313)
-    plot_metric(ax3, third, metric, '', '', '', logscale=logscale)
-    plt.legend().remove()
+    if first.shape[0] > 0:
+        ax1 = fig.add_subplot(311)
+        plot_metric(ax1, first, metric, title, '', '', logscale=logscale)
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), fancybox=True, shadow=True, ncol=5)
+    if second.shape[0] > 0:
+        ax2 = fig.add_subplot(312)
+        plot_metric(ax2, second, metric, '', xlabel, ylabel, logscale=logscale)
+        if first.shape[0] == 0:
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), fancybox=True, shadow=True, ncol=5)
+        else:
+            plt.legend().remove()
+    if third.shape[0] > 0:
+        ax3 = fig.add_subplot(313)
+        plot_metric(ax3, third, metric, '', '', '', logscale=logscale)
+        if first.shape[0] == 0 and second.shape[0] == 0:
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), fancybox=True, shadow=True, ncol=5)
+        else:
+            plt.legend().remove()
+
     return fig
 
 dataframe = read_csv(statistics_file, sep=',')
@@ -122,8 +135,5 @@ exec_time_figure.savefig(f'{output_directory}/execution_time.png')
 data_transfer_figure = create_figure(sorted_dataframe, 'data_transfer', '', '', 'data transferred (KBytes)', logscale=True)
 data_transfer_figure.savefig(f'{output_directory}/data_transfer.png')
 
-http_calls_figure = create_figure(sorted_dataframe, 'http_calls', '', '', 'number of HTTP calls', logscale=True)
-http_calls_figure.savefig(f'{output_directory}/http_calls.png')
-
-nb_results_figure = create_figure(sorted_dataframe, 'nb_results', '', '', 'number of results', logscale=True)
-nb_results_figure.savefig(f'{output_directory}/nb_results.png')
+nb_calls_figure = create_figure(sorted_dataframe, 'nb_calls', '', '', 'number of HTTP calls', logscale=True)
+nb_calls_figure.savefig(f'{output_directory}/nb_calls.png')

@@ -19,7 +19,7 @@ rule plot3_sage_ptc_5_run:
     params:
         port=lambda wcs: config["information"]["ports"]['sage-k5-60sec']
     shell:
-        'node clients/sage-ptc/bin/interface.js http://localhost:{params.port}/sparql http://localhost:{params.port}/sparql/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result}; '
+        'node clients/sage-ptc/bin/interface.js http://localhost:{params.port}/sparql http://example.org/datasets/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result} --timeout 1800; '
 
 ####################################################################################################
 # >>>>> SAGE WITH THE PTC OPERATOR AND DEPTH = 20 ###################################################
@@ -36,7 +36,7 @@ rule plot3_sage_ptc_20_run:
     params:
         port=lambda wcs: config["information"]["ports"]['sage-k20-60sec']
     shell:
-        'node clients/sage-ptc/bin/interface.js http://localhost:{params.port}/sparql http://localhost:{params.port}/sparql/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result}; '
+        'node clients/sage-ptc/bin/interface.js http://localhost:{params.port}/sparql http://example.org/datasets/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result} --timeout 1800; '
 
 ####################################################################################################
 # >>>>> SAGE WITH THE MULTI-PREDICATE AUTOMATON APPROACH ###########################################
@@ -53,7 +53,7 @@ rule plot3_sage_multi_run:
     params:
         port=lambda wcs: config["information"]["ports"]['sage-k20-60sec']
     shell:
-        'node clients/sage-multi/bin/interface.js http://localhost:{params.port}/sparql http://localhost:{params.port}/sparql/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result}; '
+        'node clients/sage-multi/bin/interface.js http://localhost:{params.port}/sparql http://example.org/datasets/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result} --timeout 1800; '
 
 ####################################################################################################
 # >>>>> VIRTUOSO ###################################################################################
@@ -70,7 +70,7 @@ rule plot3_virtuoso_run:
     params:
         port=lambda wcs: config["information"]["ports"]['virtuoso']
     shell:
-        'python clients/endpoints/interface.py virtuoso http://localhost:{params.port}/sparql http://example.org/datasets/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result}; '
+        'python clients/endpoints/interface.py virtuoso http://localhost:{params.port}/sparql http://example.org/datasets/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result} --timeout 1800; '
 
 ####################################################################################################
 # >>>>> JENA FUSEKI ################################################################################
@@ -87,7 +87,7 @@ rule plot3_jena_run:
     params:
         port=lambda wcs: config["information"]["ports"]['fuseki']
     shell:
-        'python clients/endpoints/interface.py fuseki http://localhost:{params.port}/{wildcards.dataset} --file {input.query} --measure {output.stats} --format xml --output {output.result}'
+        'python clients/endpoints/interface.py fuseki http://localhost:{params.port}/{wildcards.dataset} http://localhost:{params.port}/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result} --timeout 1800;'
 
 ####################################################################################################
 # >>>>> PREPARE CSV FILES TO BUILD PLOTS ###########################################################
@@ -125,7 +125,7 @@ rule plot3_compute_average:
     params:
         files=lambda wcs: [f'output/data/performance/{wcs.dataset}/{wcs.approach}/{run}/all.csv' for run in range(first_run(3), last_run(3) + 1)]
     shell:
-        'python scripts/average.py {output} "approach,dataset,query" {params.files}'
+        'python scripts/average.py {output} {params.files}'
 
 
 rule plot3_merge_all_approaches:
@@ -146,4 +146,4 @@ rule build_plot3:
         'output/figures/performance/{dataset}/data_transfer.png',
         'output/figures/performance/{dataset}/execution_time.png'
     shell:
-        'python scripts/performance_comparison.py --input {input} --output {output}'
+        'python scripts/performance_comparison.py --input {input} --output output/figures/performance/{wildcards.dataset}'

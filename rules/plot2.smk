@@ -19,7 +19,7 @@ rule plot2_sage_agg_run:
     params:
         port=lambda wcs: config["information"]["ports"][f'sage-k20-{wcs.quantum}']
     shell:
-        'node clients/sage-ptc/bin/interface.js http://localhost:{params.port}/sparql http://localhost:{params.port}/sparql/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result}; '
+        'node clients/sage-ptc/bin/interface.js http://localhost:{params.port}/sparql http://example.org/datasets/{wildcards.dataset} --file {input.query} --measure {output.stats} --output {output.result} --timeout 1800; '
 
 ####################################################################################################
 # >>>>> PREPARE CSV FILES TO BUILD PLOTS ###########################################################
@@ -59,7 +59,7 @@ rule plot2_compute_average:
     params:
         files=lambda wcs: [f'output/data/quantum-impacts/{wcs.dataset}/{wcs.quantum}/{run}/all.csv' for run in range(first_run(2), last_run(2) + 1)]
     shell:
-        'python scripts/average.py {output} "approach,dataset,quantum,query" {params.files}'
+        'python scripts/average.py {output} {params.files}'
 
 
 rule plot2_merge_all_queries:
@@ -78,4 +78,4 @@ rule build_plot2:
     output:
         'output/figures/quantum-impacts/{dataset}/figure.png'
     shell:
-        'python scripts/parameters_impact.py --input {input} --output output/figures/quantum-impacts/{dataset}'
+        'python scripts/parameters_impact.py --input {input} --output output/figures/quantum-impacts/{wildcards.dataset}'
