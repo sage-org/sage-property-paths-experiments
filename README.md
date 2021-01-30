@@ -215,6 +215,8 @@ Here you have an extract of the configuration file used to run our experiments.
 ```
 
 Configurable fields are detailed below:
+- **approaches:** the approaches to compare. 
+    - accepted values: SaGe-PTC-5, SaGe-PTC-20, SaGe-Multi, Virtuoso and Jena-Fuseki
 - **dataset:** the dataset on which queries will be executed. 
     - accepted values: gmark
 - **depths:** the differents values of the MaxDepth parameter for which queries will be executed. 
