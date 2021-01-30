@@ -35,8 +35,8 @@ in terms of HTTP calls, data transfer and query execution time.
 In our experiments, we use the [gMark](https://hal.inria.fr/hal-01402575) framework, 
 which is a framework designed to generate synthetic graph instances coupled with 
 complex property path query workloads. We generate a graph instance having 7,533,145 edges and
-30 queries for the "Shop" gMark scenario. All our queries contain from one to four
-transitive path expressions.
+30 queries for the ["Shop"](https://github.com/gbagan/gmark/blob/master/use-cases/shop.xml) gMark 
+scenario. All our queries contain from one to four transitive path expressions.
 
 ## Compared Approaches
 
@@ -121,8 +121,8 @@ change in the next instructions and please update the
 **Virtuoso** needs to be configured to use a single thread per query and to disable quotas.
 - In the *\[SPARQL\]* section of the file ```/usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini```
     - set *ResultSetMaxRows*, *MaxQueryCostEstimationTime* and *MaxQueryExecutionTime* to **10^9** in order to disable quotas.
-- In the *Parameters* section of the file ```/usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini```
-    - set *\[MaxQueryMem\]*, *NumberOfBuffers* and *MaxDirtyBuffers* to an appropriate value based on the 
+- In the *\[Parameters\]* section of the file ```/usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini```
+    - set *MaxQueryMem*, *NumberOfBuffers* and *MaxDirtyBuffers* to an appropriate value based on the 
     amount of RAM available on your machine. In our experiments, we used the settings recommended for 
     a machine with 8Go of RAM.
     - set *ThreadsPerQuery* to **1**.
@@ -150,16 +150,17 @@ bash install.sh
 
 ## Datasets ingestion
 
-All the datasets used in our experiments are available online:
-- **The gmark dataset** is available in the [.hdt]() and [.nt]() formats
-
-First, download all **.hdt** and **.nt** datasets into the **graphs** directory.
+The gMark dataset used in our experiments is available online. Download the **.hdt** and the **.nt** into the **graphs** directory.
+```bash
+wget jadserver.fr/thesis/projects/ppaths/datasets/gmark.hdt
+wget jadserver.fr/thesis/projects/ppaths/datasets/gmark.nt
+```
 
 ### Ingest data in Virtuoso
 
 ```bash
 # Loads all .nt files in the graphs directory
-isql "EXEC=ld_dir('${PROJECT_DIRECTORY}/graphs', '*.nt', 'http://example.org/datasets/default');"
+isql "EXEC=ld_dir('{PROJECT_DIRECTORY}/graphs', '*.nt', 'http://example.org/datasets/default');"
 isql "EXEC=rdf_loader_run();"
 isql "EXEC=checkpoint;"
 ```
