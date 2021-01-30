@@ -113,8 +113,8 @@ To run our experiments, the following softwares and packages have to be installe
 ```/usr/local/virtuoso-opensource``` and Fuseki is installed in the ```servers/fuseki```
 directory. If you change the location of Virtuoso or Fuseki, do not forget to propagate this
 change in the next instructions and please update the
-[start_server.sh](https://github.com/JulienDavat/sage-sparql-void/blob/master/scripts/start_servers.sh) and
-[stop_server.sh](https://github.com/JulienDavat/sage-sparql-void/blob/master/scripts/stop_servers.sh) scripts.
+[start_server.sh](https://github.com/JulienDavat/property-paths-experiments/blob/main/scripts/start_servers.sh) and
+[stop_server.sh](https://github.com/JulienDavat/property-paths-experiments/blob/main/scripts/stop_servers.sh) scripts.
 
 ## Configuration
 
