@@ -152,8 +152,8 @@ bash install.sh
 
 The gMark dataset used in our experiments is available online. Download the **.hdt** and the **.nt** into the **graphs** directory.
 ```bash
-wget jadserver.fr/thesis/projects/ppaths/datasets/gmark.hdt
-wget jadserver.fr/thesis/projects/ppaths/datasets/gmark.nt
+wget nas.jadserver.fr/thesis/projects/ppaths/datasets/gmark.hdt
+wget nas.jadserver.fr/thesis/projects/ppaths/datasets/gmark.nt
 ```
 
 ### Ingest data in Virtuoso
