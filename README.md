@@ -22,6 +22,10 @@ property path online and deliver complete results. Experimental results
 demonstrate that our approach outperforms existing smart client solutions 
 in terms of HTTP calls, data transfer and query execution time.
 
+**PDF:** https://openreview.net/forum?id=Z9svaleWRAF
+
+**Demo:** https://github.com/sage-org/sage-property-path-demo
+
 # Approach illustration
 
 **Figure**: First iteration of eval(Q3) as defined in Algorithm 3 over the dataset D with MaxDepth = 1
